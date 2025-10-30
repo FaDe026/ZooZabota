@@ -1,6 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss']
+  vite: { plugins: [tailwindcss(),], },
+  css: ['./app/assets/css/main.css'],
+  modules: ['@nuxtjs/google-fonts', '@nuxt/icon'],
+  googleFonts: {
+    families: {
+      Cuprum: true,
+    }
+  }
 })

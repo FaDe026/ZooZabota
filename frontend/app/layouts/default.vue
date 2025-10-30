@@ -1,9 +1,11 @@
+<script setup lang="ts">
+
+</script>
+
 <template>
-    <div>
-        <Header></Header>
+    <div class="font-cuprum bg-bg">
+        <AppHeader></AppHeader>
         <slot></slot>
-        <footer>
-            footer
-        </footer>
+        <AppFooter></AppFooter>
     </div>
 </template>
