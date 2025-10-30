@@ -1,0 +1,9 @@
+<template>
+    <div>
+        <Header></Header>
+        <slot></slot>
+        <footer>
+            footer
+        </footer>
+    </div>
+</template>
