@@ -10,5 +10,9 @@ export default defineNuxtConfig({
     families: {
       Cuprum: true,
     }
+  },
+  icon: {
+    mode: 'svg',
+    cssLayer: 'base'
   }
 })

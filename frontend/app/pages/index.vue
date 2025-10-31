@@ -60,27 +60,31 @@
     </section>
 
     <section class="flex justify-center py-15 px-2">
-        <div class="max-w-7xl">
+        <div class="flex flex-col items-center max-w-7xl w-full gap-10">
             <h2 class="section-title">Последние новости</h2>
+            <div class="grid grid-cols-3 w-full gap-5">
+                <IndexNewsCard img-src="/images/news/1.png" title="Пропала собака! Заволжский район"></IndexNewsCard>
+                <IndexNewsCard img-src="/images/news/2.png" title="У нас прошла вакцинация"></IndexNewsCard>
+                <IndexNewsCard img-src="/images/news/3.png" title="Красавец Лакки нашёл своих хозяев и отправился домой!"></IndexNewsCard>
+            </div>
         </div>
     </section>
 
 
     <section class="flex justify-center py-15 px-2">
-        <div class="max-w-7xl">
-            <h2 class="section-title">Контакты</h2>
-            <div>
-                <!-- Карточка -->
-                <div class="flex gap-2 justify-between items-stretch rounded-2xl bg-primary h-auto">
-                    <div class="rounded-2xl bg-white w-30 grow z-10"></div>
-                    <div>
-                        <h2>Фамилия имя</h2>
-                        <span>Директор приюта</span>
-                        
-                    </div>
-                    <div></div>
+        <div class="flex flex-col items-center max-w-7xl w-full gap-10">
+            <h2 class="section-title text-center ">Контакты</h2>
+            <div class="flex flex-col w-full gap-5">
+                <div class="flex w-full justify-evenly gap-5">
+                    <IndexContactCard></IndexContactCard>
+                    <IndexContactCard></IndexContactCard>
+                    <IndexContactCard></IndexContactCard>
                 </div>
-
+                <div class="flex w-full justify-evenly gap-5">
+                    <IndexContactCard></IndexContactCard>
+                    <IndexContactCard></IndexContactCard>
+                    <IndexContactCard></IndexContactCard>
+                </div>
             </div>
         </div>
     </section>

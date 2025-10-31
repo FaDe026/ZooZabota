@@ -5,6 +5,8 @@
     --color-secondary: hsl(18, 100%, 64%);
     --color-bg: hsla(44, 43%, 93%, 1);
 
+    --color-text-muted-bg: rgb(186, 175, 154);
+
     --color-nav-border: hsla(145, 47%, 45%, 1);
     --color-alert: hsla(17, 100%, 71%, 1);
 
