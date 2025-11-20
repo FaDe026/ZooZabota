@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: hsl(146, 50%, 36%);
+    --color-secondary: hsl(18, 100%, 64%);
+    --color-bg: hsla(44, 43%, 93%, 1);
+
+    --color-text-muted-bg: rgb(186, 175, 154);
+
+    --color-nav-border: hsla(145, 47%, 45%, 1);
+    --color-alert: hsla(17, 100%, 71%, 1);
+
+
+    --font-cuprum: 'Cuprum';
+
+}
+
+body {
+    @apply bg-bg
+}
+
+@layer components{
+    .nav-btn {
+        @apply w-full text-center text-2xl p-3 border-nav-border border-t border-l 
+    }
+    .btn{
+        @apply text-3xl px-15 py-2 rounded-3xl bg-secondary text-white hover:cursor-pointer
+    }
+    .section-title{
+        @apply text-4xl text-primary uppercase
+    }
+}
