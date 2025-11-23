@@ -10,9 +10,9 @@ const titleProcessed = computed(()=> title.replaceAll('<', '&lt;').replaceAll('>
 
 </script>
 <template>
-    <div class="flex flex-col gap-2 w-full">
+    <div class="flex flex-col gap-2 w-full cursor-pointer">
         <span class="text-text-muted-bg ">{{ date }}</span>
-        <img class="w-full aspect-video object-cover rounded-4xl" :src="imgSrc" alt="">
+        <img class="w-full aspect-video object-cover rounded-xl shadow-xl/10" :src="imgSrc" alt="">
         <h3 class="text-2xl text-primary">{{ title }}</h3>
     </div>
 </template>
