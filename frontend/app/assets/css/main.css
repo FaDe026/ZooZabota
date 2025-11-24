@@ -1,32 +1,61 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary: hsl(146, 50%, 36%);
-    --color-secondary: hsl(18, 100%, 64%);
-    --color-bg: hsla(44, 43%, 93%, 1);
+  --color-primary: hsl(186, 42%, 18%);
+  --color-accent: hsl(7, 70%, 67%);
+  --color-bg: hsl(42, 39%, 94%);
+  --color-text-primary: hsl(0, 0%, 17%);
+  --color-text-secondary: hsl(0, 0%, 55%);
 
-    --color-text-muted-bg: rgb(186, 175, 154);
+  --color-card-top-color: hsla(0, 0%, 100%, 1);
+  --color-card-bottom-color: hsla(43, 37%, 96%, 1);
+  --color-card-shadow: hsl(0, 0%, 0%);
 
-    --color-nav-border: hsla(145, 47%, 45%, 1);
-    --color-alert: hsla(17, 100%, 71%, 1);
+  --color-text-muted-bg: rgb(186, 175, 154);
 
+  --color-nav-border: hsl(186, 42%, 28%);
+  --color-alert: hsla(17, 100%, 71%, 1);
 
-    --font-cuprum: 'Cuprum';
-
+  --font-cuprum: "Cuprum";
 }
 
 body {
-    @apply bg-bg
+  @apply bg-bg;
 }
 
-@layer components{
-    .nav-btn {
-        @apply w-full text-center text-2xl p-3 border-nav-border border-t border-l 
-    }
-    .btn{
-        @apply text-3xl px-15 py-2 rounded-3xl bg-secondary text-white hover:cursor-pointer
-    }
-    .section-title{
-        @apply text-4xl text-primary uppercase
-    }
+@layer base {
+  .card-bg {
+    @apply bg-linear-to-t from-card-bottom-color to-card-top-color;
+  }
+  .card-shadow {
+    @apply shadow-lg;
+  }
+}
+
+@layer components {
+  .base-container {
+    @apply w-full max-w-7xl;
+  }
+
+  .base-card {
+    @apply text-text-primary shadow-lg bg-linear-to-t from-card-bottom-color to-card-top-color rounded-xl py-3 px-6;
+  }
+
+  .base-section {
+    @apply py-15 px-4;
+  }
+
+  .index-card-link {
+    @apply text-center text-2xl transition-transform hover:scale-102;
+  }
+
+  .nav-btn {
+    @apply flex items-center justify-center w-full text-center text-2xl p-3 border-t-0 border-nav-border sm:border-t;
+  }
+  .btn {
+    @apply text-3xl px-15 py-2 rounded-xl bg-accent text-white hover:cursor-pointer;
+  }
+  .section-title {
+    @apply text-4xl text-text-primary uppercase;
+  }
 }
