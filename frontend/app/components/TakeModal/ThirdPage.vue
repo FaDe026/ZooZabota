@@ -1,0 +1,3 @@
+<template>
+    third
+</template>
