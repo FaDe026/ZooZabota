@@ -83,12 +83,12 @@
         <div class="mx-auto flex flex-col items-center max-w-7xl w-full gap-10">
             <h2 class="section-title text-center ">Контакты</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-max w-full gap-5">
-                    <IndexContactCard></IndexContactCard>
-                    <IndexContactCard></IndexContactCard>
-                    <IndexContactCard></IndexContactCard>
-                    <IndexContactCard></IndexContactCard>
-                    <IndexContactCard></IndexContactCard>
-                    <IndexContactCard></IndexContactCard>
+                <IndexContactCard></IndexContactCard>
+                <IndexContactCard></IndexContactCard>
+                <IndexContactCard></IndexContactCard>
+                <IndexContactCard></IndexContactCard>
+                <IndexContactCard></IndexContactCard>
+                <IndexContactCard></IndexContactCard>
             </div>
         </div>
     </section>

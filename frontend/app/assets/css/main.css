@@ -6,6 +6,8 @@
   --color-bg: hsl(42, 39%, 94%);
   --color-text-primary: hsl(0, 0%, 17%);
   --color-text-secondary: hsl(0, 0%, 55%);
+  
+  --color-input-border: hsl(0, 0%, 55%);
 
   --color-card-top-color: hsla(0, 0%, 100%, 1);
   --color-card-bottom-color: hsla(43, 37%, 96%, 1);
@@ -53,7 +55,10 @@ body {
     @apply flex items-center justify-center w-full text-center text-2xl p-3 border-t-0 border-nav-border sm:border-t;
   }
   .btn {
-    @apply text-3xl px-15 py-2 rounded-xl bg-accent text-white hover:cursor-pointer;
+    @apply text-3xl px-10 py-2 rounded-xl bg-accent text-white hover:cursor-pointer border-2 border-accent text-center;
+  }
+  .secondary-btn{
+    @apply text-3xl px-10 py-2 rounded-xl hover:cursor-pointer border-2 border-accent text-accent transition-colors hover:text-bg hover:bg-accent;
   }
   .section-title {
     @apply text-4xl text-text-primary uppercase;

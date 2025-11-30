@@ -1,9 +1,9 @@
 <template>
     <div class="min-h-screen bg-bg font-cuprum">
         <main class="base-section pt-10">
-            <div class="mx-auto base-container">
+            <div class="base-container">
                 <div class="flex justify-end mb-8">
-                    <button class="font-cuprum text-text-secondary flex items-center gap-3 px-12 py-3 cursor-pointer">
+                    <button class="font-cuprum text-text-secondary flex items-center gap-3 py-3 cursor-pointer">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z"
@@ -17,7 +17,7 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mx-9">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     <div v-for="dog in dogs" :key="dog.id"
                         class="bg-linear-to-b from-white to-[#F9F7F2] rounded-2xl overflow-hidden shadow-lg border border-gray-200 cursor-pointer transition-transform hover:scale-105 duration-300">
                         <NuxtLink :to="`/dog/${dog.id}`" class="block">
@@ -66,11 +66,8 @@
                 </div>
                 <CustodyModal :is-open="isCustodyModalOpen" :dog="selectedDog" @close="closeCustodyModal"
                     @submit="handleCustodySubmit" />
-                <Modal :is-open="isTakeModalOpen" title="Test" @close="closeTakeModal">
-                    <div class="w-full">
-                        test
-                    </div>
-                </Modal>
+                <TakeModal :is-open="isTakeModalOpen" @close="closeTakeModal">
+                </TakeModal>
             </div>
         </main>
     </div>
@@ -97,7 +94,7 @@ function openTakeModal(dog: Dog) {
     selectedDog.value = dog
 }
 
-function closeTakeModal ()  {
+function closeTakeModal() {
     isTakeModalOpen.value = false
     selectedDog.value = undefined
 }
@@ -112,7 +109,7 @@ const closeCustodyModal = () => {
     selectedDog.value = undefined
 }
 
-function handleTakeSumbit(){
+function handleTakeSumbit() {
     closeTakeModal()
 }
 
