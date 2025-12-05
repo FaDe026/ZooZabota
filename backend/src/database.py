@@ -23,3 +23,6 @@ async def get_session():
 
 class Base(DeclarativeBase):
     pass
+
+from .models.dogs import DogModel
+from .models.news import NewsModel
