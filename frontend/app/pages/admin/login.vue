@@ -5,7 +5,7 @@ definePageMeta({
 </script>
 
 <template>
-    <div class="flex flex-col justify-center items-center px-2 h-[calc(100vh-200px)] w-full">
+    <section class="flex flex-col justify-center items-center px-2 h-[calc(100vh-200px)] w-full">
         <h1 class="text-center text-4xl text-text-primary mb-6">КОВЧЕГ</h1>
         <form action="" class="flex flex-col gap-3 w-full max-w-100">
             <TextInput placeholder="Логин" class="input-grad-bg border-0 shadow-lg"></TextInput>
@@ -17,5 +17,5 @@ definePageMeta({
             <button class="btn">Войти</button>
             <a href="#" class="self-center text-text-secondary">Забыли пароль?</a>
         </form>
-    </div>
+    </section>
 </template>
