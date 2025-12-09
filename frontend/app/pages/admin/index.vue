@@ -13,9 +13,12 @@ definePageMeta({
                 <span>Требуют внимания: 4</span>
             </div>
             <div class="flex flex-col gap-2">
-                <a href="" class="card-bg card-shadow py-4 text-center rounded-xl text-2xl">Заявки</a>
-                <a href="" class="card-bg card-shadow py-4 text-center rounded-xl text-2xl">Животные</a>
-                <a href="" class="card-bg card-shadow py-4 text-center rounded-xl text-2xl">Новости</a>
+                <a href=""
+                    class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">Заявки</a>
+                <a href=""
+                    class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">Животные</a>
+                <a href=""
+                    class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">Новости</a>
             </div>
         </div>
         <button class="btn w-min self-center">Выйти</button>
