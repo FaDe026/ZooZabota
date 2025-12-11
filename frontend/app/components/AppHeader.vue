@@ -15,8 +15,15 @@ function hamburgerClicked() {
 <template>
     <header class="sticky sm:relative top-0 z-20 w-full bg-primary text-bg flex justify-center">
         <div class="w-full">
-            <div class="flex justify-between items-center w-full px-5 py-5">
-                <NuxtLink to="/" class="uppercase text-4xl sm:text-7xl tracking-wider">Ковчег</NuxtLink>
+            <div class="relative flex justify-between items-center w-full px-5 py-5">
+                <NuxtLink to="/">
+                    <img width="55" height="55" class="object-cover brightness-0 invert-100" src="/images/logo.png"
+                        alt="Логотип">
+                </NuxtLink>
+                <NuxtLink to="/"
+                    class="md:absolute md:top-1/2 md:left-1/2 md:-translate-1/2 uppercase text-4xl sm:text-7xl tracking-wider ">
+                    Ковчег
+                </NuxtLink>
                 <NuxtLink to="/help" class="btn hidden sm:block">Помочь приюту</NuxtLink>
                 <button class="sm:hidden" @click="hamburgerClicked()">
                     <div class="flex flex-col gap-2 w-10 " v-if="!navExpanded">
