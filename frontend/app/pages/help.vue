@@ -71,6 +71,10 @@
                     <label for="phoneInput" class="text-text-secondary">Телефон</label>
                     <TextInput input-id="phoneInput" placeholder="+7 (800) 55-35-34" class="mb-2"></TextInput>
                 </div>
+                <div>
+                    <label class="text-text-secondary">Количество человек</label>
+                    <InputNumber></InputNumber>
+                </div>
             </form>
             <button class="btn self-center px-6 py-1">Записаться</button>
         </div>
