@@ -37,7 +37,7 @@
             <h2 class="section-title">Наши питомцы</h2>
             <div
                 class="w-full h-[460px] flex justify-center items-center text-primary text-2xl border border-primary rounded-2xl">
-                Здесь будет крутой 3д слайдер
+                <SliderPagination :page-count="4" :current-page="2"></SliderPagination> 
             </div>
             <button class="btn">Выбрать питомца</button>
         </div>

@@ -19,6 +19,9 @@
   --color-alert: hsla(17, 100%, 71%, 1);
 
   --font-cuprum: "Cuprum";
+
+  --color-pagination-inactive: hsl(0, 0%, 64%);
+  --color-pagination-active: hsl(0, 0%, 38%);
 }
 
 body {
