@@ -13,7 +13,7 @@ router = APIRouter(prefix="/news", tags=["News"])
 async def add_news(news_data: NewsAddSchema, session: AsyncSession = Depends(get_session)):
     new_news = NewsModel(
         title=news_data.title,
-        date=news_data.date,  # ← уже datetime, не нужно парсить!
+        date=news_data.date or datetime.now().replace(microsecond=0, second=0),
         body=news_data.body,
         author_id=news_data.author_id,
         tags=news_data.tags,
@@ -54,7 +54,6 @@ async def update_news(news_id: int, news_data: NewsAddSchema, session: AsyncSess
     if not news:
         raise HTTPException(status_code=404, detail="Новость не найдена")
 
-    # Обновляем поля
     news.title = news_data.title
     news.date = news_data.date
     news.body = news_data.body

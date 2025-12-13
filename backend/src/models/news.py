@@ -8,7 +8,7 @@ class NewsModel(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Author_ID(FK) — внешний ключ на автора Пока что не внешний

@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from datetime import datetime
 
 
 class NewsAddSchema(BaseModel):
     title: str
-    date: datetime
+    date: None = None
     body: str
     author_id: int
     tags: str | None = None
@@ -24,3 +24,7 @@ class NewsGetSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @field_serializer('date')
+    def serialize_date(self, dt: datetime) -> str:
+        return dt.strftime('%Y-%m-%d %H:%M')
