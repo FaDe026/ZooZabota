@@ -2,7 +2,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.database import Base
 from src.enums import GenderEnum
 from sqlalchemy import String
-from datetime import datetime
+from datetime import date
 from sqlalchemy import Text
 
 
@@ -14,6 +14,6 @@ class DogModel(Base):
     age : Mapped[int]
     breed: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(Text())
-    intake_date: Mapped[datetime]
+    intake_date: Mapped[date] = mapped_column(default=date.today, nullable=True)
     veterinary_passport: Mapped[bool]
     gender: Mapped[GenderEnum]
