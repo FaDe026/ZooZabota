@@ -4,10 +4,11 @@ from src.models.dogs import DogModel
 from src.schemas.dogs import DogAddSchema, DogResponseSchema
 from sqlalchemy import select
 
-router = APIRouter()
+
+router = APIRouter(prefix="/dogs", tags=["Dogs"])
 
 
-@router.post("/dogs", response_model=DogResponseSchema)
+@router.post("", response_model=DogResponseSchema)
 async def add_dog(data: DogAddSchema, session: SessionDep):
     new_dog = DogModel(
         name=data.name,
@@ -23,14 +24,24 @@ async def add_dog(data: DogAddSchema, session: SessionDep):
     return new_dog
 
 
-@router.get("/dogs", response_model=list[DogResponseSchema])
+@router.get("", response_model=list[DogResponseSchema])
 async def get_dogs(session: SessionDep):
     query = select(DogModel)
     result = await session.execute(query)
     return result.scalars().all()
 
 
-@router.put("/dogs/{dog_id}", response_model=DogResponseSchema)
+@router.get("/{dog_id}", response_model=DogResponseSchema)
+async def get_dog(dog_id: int, session: SessionDep):
+    query = select(DogModel).where(dog_id == DogModel.id)
+    result = await session.execute(query)
+    dog = result.scalar_one_or_none()
+    if dog is None:
+        raise HTTPException(status_code=404, detail="Информация о собаке не найдена")
+    return dog
+
+
+@router.put("/{dog_id}", response_model=DogResponseSchema)
 async def put_dog(dog_id: int, data: DogAddSchema, session: SessionDep):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)
@@ -51,7 +62,7 @@ async def put_dog(dog_id: int, data: DogAddSchema, session: SessionDep):
     return dog
 
 
-@router.patch("/dogs/{dog_id}", response_model=DogResponseSchema)
+@router.patch("/{dog_id}", response_model=DogResponseSchema)
 async def partial_update_dog(dog_id: int, data: DogAddSchema, session: SessionDep):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)
@@ -71,7 +82,7 @@ async def partial_update_dog(dog_id: int, data: DogAddSchema, session: SessionDe
     return dog
 
 
-@router.delete("/dogs/{dog_id}", response_model=DogResponseSchema)
+@router.delete("/{dog_id}", response_model=DogResponseSchema)
 async def delete_dog(dog_id: int, session: SessionDep):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)

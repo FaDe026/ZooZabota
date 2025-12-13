@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from src.database import engine, Base
 
-router = APIRouter()
-@router.post("/setup_database")
+router = APIRouter(prefix="/setup_database", tags=["Database"])
+@router.post("/")
 async def setup_database():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
