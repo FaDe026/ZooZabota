@@ -86,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import CustodyModal from '@/components/CustodyModal.vue'
+import CustodyModal from '~/components/CustodyModal.vue'
 
 definePageMeta({
     layout: 'default'

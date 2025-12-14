@@ -11,7 +11,7 @@
                   :key="filter.id"
                   @click="activeFilter = filter.id"
                   :class="[
-                    'rounded-xl font-normal text-lg whitespace-nowrap px-11 py-1', 
+                    'rounded-xl font-normal text-lg whitespace-nowrap px-9 py-1', 
                     activeFilter === filter.id 
                       ? 'base-card text-accent border-2 border-accent' 
                       : 'base-card'
@@ -42,11 +42,12 @@
                     <p class="text-base text-text-secondary">{{ application.clientName }}</p>
                     <p class="text-base text-text-secondary">{{ application.phone }}</p>
                   </div>
-                    <button 
-                        @click="toggleApplicationDetails(application.id)"
-                        class="bg-accent text-white border-2 border-accent rounded-xl px-4 py-2 text-xl">
-                        Просмотр
-                    </button>
+                    <NuxtLink
+                    :to="`/application/${application.id}`"
+                    class="bg-accent text-white border-2 border-accent rounded-xl px-4 py-2 text-xl"
+                    >
+                    Просмотр
+                    </NuxtLink>
                 </div>
                 <div class="flex justify-between items-center">
                     <p class="text-sm text-text-secondary">{{ formatDate(application.createdAt) }}</p>
