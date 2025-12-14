@@ -84,12 +84,10 @@ const formData = reactive({
 
 const disableBodyScroll = () => {
     document.body.style.overflow = 'hidden'
-    document.body.style.paddingRight = '15px' 
 }
 
 const enableBodyScroll = () => {
     document.body.style.overflow = ''
-    document.body.style.paddingRight = ''
 }
 
 const closeModal = () => {
