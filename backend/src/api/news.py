@@ -5,17 +5,21 @@ from src.database import get_session
 from src.models.news import NewsModel
 from src.schemas.news import NewsAddSchema, NewsGetSchema
 from datetime import datetime
+from src.models.user import UserModel
+from src.api.auth import get_current_user
 
 router = APIRouter(prefix="/news", tags=["News"])
 
 
 @router.post("/", response_model=NewsGetSchema)
-async def add_news(news_data: NewsAddSchema, session: AsyncSession = Depends(get_session)):
+async def add_news(news_data: NewsAddSchema, 
+                   current_user: UserModel = Depends(get_current_user),
+                   session: AsyncSession = Depends(get_session)):
     new_news = NewsModel(
         title=news_data.title,
         date=news_data.date or datetime.now().replace(microsecond=0, second=0),
         body=news_data.body,
-        author_id=news_data.author_id,
+        author_id=current_user.id,
         tags=news_data.tags,
         preview=news_data.preview,
         news_image_id=news_data.news_image_id

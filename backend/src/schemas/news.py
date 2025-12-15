@@ -6,7 +6,6 @@ class NewsAddSchema(BaseModel):
     title: str
     date: None = None
     body: str
-    author_id: int
     tags: str | None = None
     preview: str | None = None
     news_image_id: int | None = None

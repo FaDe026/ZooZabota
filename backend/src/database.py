@@ -26,3 +26,4 @@ class Base(DeclarativeBase):
 
 from .models.dogs import DogModel
 from .models.news import NewsModel
+from .models.user import UserModel
