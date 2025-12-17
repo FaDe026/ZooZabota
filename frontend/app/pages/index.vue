@@ -35,9 +35,8 @@
     <section class="base-section">
         <div class="mx-auto flex flex-col items-center base-container gap-10">
             <h2 class="section-title">Наши питомцы</h2>
-            <div
-                class="w-full h-[460px] flex justify-center items-center text-primary text-2xl border border-primary rounded-2xl">
-                <SliderPagination :page-count="4" :current-page="2"></SliderPagination> 
+            <div class="w-full flex justify-center items-center">
+                <DogSlider></DogSlider>
             </div>
             <button class="btn">Выбрать питомца</button>
         </div>

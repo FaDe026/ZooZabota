@@ -11,7 +11,7 @@ const emit = defineEmits<{
 }>()
 
 function pageColor(page: number) {
-    return (page === currentPage.value) ? pageActiveColorClass : pageInactiveColorClass
+    return (page === currentPage.value + 1) ? pageActiveColorClass : pageInactiveColorClass
 }
 
 function pageClicked(page: number) {
