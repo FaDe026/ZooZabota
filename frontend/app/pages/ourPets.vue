@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-screen bg-bg font-cuprum">
         <main class="base-section pt-10">
-            <div class="base-container">
+            <div class="base-container mx-auto">
                 <div class="flex justify-end mb-8">
                     <button class="font-cuprum text-text-secondary flex items-center gap-3 py-3 cursor-pointer">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -4,10 +4,11 @@ const emit = defineEmits<{
     (e: 'close'): void
 }>()
 
-const { isOpen, title = "Заголовок", modalClass = "" } = defineProps<{
+const { isOpen, title = "Заголовок", modalClass = "", headerClass = "" } = defineProps<{
     isOpen: boolean,
     title?: string,
-    modalClass?: string
+    modalClass?: string,
+    headerClass?: string
 }>()
 
 function closeModal() {
@@ -43,7 +44,7 @@ watch(() => isOpen, (newVal) => {
             <div class="bg-linear-to-t from-card-bottom-color to-card-top-color rounded-2xl shadow-lg max-w-md w-full"
                 :class="modalClass" @click.stop>
                 <slot name="beforeHeader"></slot>
-                <div class="relative px-6">
+                <div class="flex items-center justify-center relative px-6" :class="headerClass">
                     <h2 class="text-xl font-medium text-center">{{ title }}</h2>
                     <button @click="closeModal"
                         class="absolute right-6 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-primary transition-colors">
