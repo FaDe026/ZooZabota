@@ -7,8 +7,3 @@ class TagModel(Base):
 
     id : Mapped[int] = mapped_column(primary_key=True)
     name : Mapped[str]
-
-    dogs: Mapped[list["DogModel"]] = relationship(
-        secondary=tag_dog,
-        back_populates="tags"
-    )
