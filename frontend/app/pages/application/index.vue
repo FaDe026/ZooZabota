@@ -61,6 +61,7 @@
           
         </div>
       </div>
+      <NuxtPage />
     </main>
   </div>
 </template>
@@ -106,7 +107,8 @@ const applications = ref<Application[]>([
     petName: 'Лич',
     clientName: 'Иван Иванов',
     phone: '+8 (800) 555-35-35',
-    type: 'adoption',
+    email: '123@mail.ru',
+    type: 'custody',
     status: 'in_progress',
     createdAt: new Date('2025-11-28T16:17:00')
   },
