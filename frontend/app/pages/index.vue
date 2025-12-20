@@ -69,10 +69,10 @@
         <div class="mx-auto flex flex-col items-center max-w-7xl w-full gap-10">
             <h2 class="section-title">Последние новости</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full gap-5">
-                <IndexNewsCard img-src="/images/news/1.png" title="Пропала собака! Заволжский район"></IndexNewsCard>
-                <IndexNewsCard img-src="/images/news/2.png" title="У нас прошла вакцинация"></IndexNewsCard>
-                <IndexNewsCard img-src="/images/news/3.png"
-                    title="Красавец Лакки нашёл своих хозяев и отправился домой!"></IndexNewsCard>
+                <NewsCard img-src="/images/news/1.png" title="Пропала собака! Заволжский район"></NewsCard>
+                <NewsCard img-src="/images/news/2.png" title="У нас прошла вакцинация"></NewsCard>
+                <NewsCard img-src="/images/news/3.png" title="Красавец Лакки нашёл своих хозяев и отправился домой!">
+                </NewsCard>
             </div>
         </div>
     </section>
@@ -82,12 +82,12 @@
         <div class="mx-auto flex flex-col items-center max-w-7xl w-full gap-10">
             <h2 class="section-title text-center ">Контакты</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-max w-full gap-5">
-                <IndexContactCard></IndexContactCard>
-                <IndexContactCard></IndexContactCard>
-                <IndexContactCard></IndexContactCard>
-                <IndexContactCard></IndexContactCard>
-                <IndexContactCard></IndexContactCard>
-                <IndexContactCard></IndexContactCard>
+                <ContactCard></ContactCard>
+                <ContactCard></ContactCard>
+                <ContactCard></ContactCard>
+                <ContactCard></ContactCard>
+                <ContactCard></ContactCard>
+                <ContactCard></ContactCard>
             </div>
         </div>
     </section>
