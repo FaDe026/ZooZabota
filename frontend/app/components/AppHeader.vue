@@ -38,7 +38,7 @@ function hamburgerClicked() {
                 class="flex flex-col justify-evenly w-full max-h-0 transition-[max-height] duration-350 overflow-hidden divide-hidden sm:max-h-200 sm:flex-row sm:divide-solid sm:divide-x divide-nav-border">
                 <a href="/ourPets" class="nav-btn">Наши питомцы</a>
                 <a href="" class="nav-btn">Приют</a>
-                <a href="" class="nav-btn">Новости</a>
+                <a href="/news" class="nav-btn">Новости</a>
                 <a href="" class="nav-btn">Контакты</a>
             </nav>
         </div>
