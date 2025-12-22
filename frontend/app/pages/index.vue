@@ -1,3 +1,24 @@
+<script lang="ts" setup>
+// const { data, error, pending } = await useNewsList()
+const config = useRuntimeConfig()
+
+const { data: newsList, error, pending: pendingNews } = await useFetch<News[]>("/news", {
+    baseURL: config.public.apiBase
+})
+
+const newsLoaded = computed(() => {
+    if (pendingNews.value) {
+        return false
+    }
+
+    if (newsList.value && newsList.value.length > 0) {
+        return true
+    }
+
+    return false
+})
+
+</script>
 <template>
     <section class="base-section pt-20">
         <div
@@ -68,10 +89,10 @@
     <section class="base-section">
         <div class="mx-auto flex flex-col items-center max-w-7xl w-full gap-10">
             <h2 class="section-title">Последние новости</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full gap-5">
-                <NewsCard img-src="/images/news/1.png" title="Пропала собака! Заволжский район"></NewsCard>
-                <NewsCard img-src="/images/news/2.png" title="У нас прошла вакцинация"></NewsCard>
-                <NewsCard img-src="/images/news/3.png" title="Красавец Лакки нашёл своих хозяев и отправился домой!">
+            <div v-if="!newsLoaded">Пока нет новостей</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full gap-5" v-else>
+                <NewsCard v-for="news in newsList?.slice(0, 3)" img-src="/images/news/1.png" :title="news.title"
+                    :key="news.id" :news-id="`${news.id}`" :date="news.date">
                 </NewsCard>
             </div>
         </div>
