@@ -98,7 +98,6 @@ const newsLoaded = computed(() => {
         </div>
     </section>
 
-
     <section class="base-section">
         <div class="mx-auto flex flex-col items-center max-w-7xl w-full gap-10">
             <h2 class="section-title text-center ">Контакты</h2>

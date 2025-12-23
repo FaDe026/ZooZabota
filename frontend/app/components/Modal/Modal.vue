@@ -4,12 +4,19 @@ const emit = defineEmits<{
     (e: 'close'): void
 }>()
 
-const { isOpen, title = "Заголовок", modalClass = "", headerClass = "" } = defineProps<{
+const { isOpen, title = "Заголовок", modalClass = "", headerClass = "", level = 0 } = defineProps<{
     isOpen: boolean,
     title?: string,
     modalClass?: string,
-    headerClass?: string
+    headerClass?: string,
+    level?: number
 }>()
+
+const styles = computed(() => {
+    return {
+        zIndex: `${50 + level}`
+    }
+})
 
 function closeModal() {
     emit('close')
@@ -39,8 +46,8 @@ watch(() => isOpen, (newVal) => {
 
 <template>
     <Transition name="modal-transition">
-        <div v-if="isOpen" class="fixed inset-0 bg-primary/40 flex items-center justify-center z-50 p-4"
-            @click="clickedOutside">
+        <div v-if="isOpen" class="fixed inset-0 bg-primary/40 flex items-center justify-center p-4"
+            @click="clickedOutside" :style="styles">
             <div class="bg-linear-to-t from-card-bottom-color to-card-top-color rounded-2xl shadow-lg max-w-md w-full"
                 :class="modalClass" @click.stop>
                 <slot name="beforeHeader"></slot>
