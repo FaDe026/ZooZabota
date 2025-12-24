@@ -34,9 +34,9 @@ function openTakeModal() {
 }
 </script>
 <template>
-    <Modal :is-open="isOpen" @close="close()">
-        <div class="card-bg rounded-2xl overflow-hidden shadow-lg border border-gray-200 w-full mx-9">
-            <div class="w-full h-96 bg-gray-200 flex items-center justify-center overflow-hidden">
+    <Modal :is-open="isOpen" @close="close()" modal-class="w-full sm:max-w-md">
+        <div class="card-bg rounded-2xl overflow-hidden shadow-lg border border-gray-200 w-full">
+            <div class="w-full aspect-video bg-gray-200 flex items-center justify-center overflow-hidden">
                 <img v-if="dog.image" :src="dog.image" :alt="dog.name" class="w-full h-full object-cover">
                 <Icon v-else name="material-symbols:pets" class="text-6xl text-text-secondary" />
             </div>

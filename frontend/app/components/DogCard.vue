@@ -57,12 +57,12 @@ function openTakeModal() {
         </div>
 
         <div class="flex flex-col md:flex-row gap-2 md:gap-3 p-6 pt-0">
-            <button class="btn text-xl font-normal flex-1" @click="openTakeModal()">
+            <button class="btn text-xl font-normal flex-1" @click.stop="openTakeModal()">
                 ХОЧУ ЗАБРАТЬ
             </button>
             <button
                 class="btn text-xl bg-transparent border-2 border-accent text-accent font-normal flex-1 hover:bg-accent hover:text-white transition-colors"
-                @click="openCustodyModal()">
+                @click.stop="openCustodyModal()">
                 ВЗЯТЬ ПОД ОПЕКУ
             </button>
         </div>

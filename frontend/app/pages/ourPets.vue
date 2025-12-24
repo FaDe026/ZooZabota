@@ -22,6 +22,13 @@ const dogToDisplay = computed(() => {
     return emptyDog
 })
 
+const helperModalLevel = computed(() => {
+    if (isDogModalOpen.value) {
+        return 1
+    }
+    return 0
+})
+
 function openTakeModal(dog: Dog) {
     isTakeModalOpen.value = true
     selectedDog.value = dog
@@ -106,10 +113,13 @@ const isErrorPresent = computed(() => {
                         @open-take-modal="openTakeModal(dog)" @click="openDogModal(dog)"></DogCard>
                 </div>
                 <CustodyModal :is-open="isCustodyModalOpen" :dog="selectedDog" @close="closeCustodyModal"
-                    @submit="handleCustodySubmit" />
-                <TakeModal :is-open="isTakeModalOpen" @close="closeTakeModal">
+                    @submit="handleCustodySubmit" :level="helperModalLevel" />
+                <TakeModal :is-open="isTakeModalOpen" @close="closeTakeModal" :level="helperModalLevel">
                 </TakeModal>
-                <DogModal :dog="dogToDisplay" :is-open="isDogModalOpen" @close="closeDogModal"></DogModal>
+                <DogModal :dog="dogToDisplay" :is-open="isDogModalOpen" @close="closeDogModal"
+                    @open-custody-modal="openCustodyModal(dogToDisplay)" @open-take-modal="openTakeModal(dogToDisplay)"
+                    :has-header="false">
+                </DogModal>
             </div>
         </main>
     </div>
