@@ -1,26 +1,66 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from src.api.dependencies import SessionDep
 from src.models.dogs import DogModel
 from src.schemas.dogs import DogAddSchema, DogResponseSchema
+from pathlib import Path as SysPath
 from sqlalchemy import select
-
+import uuid
+from typing import Optional
+from src.enums import GenderEnum
+from datetime import date
 
 router = APIRouter(prefix="/dogs", tags=["Dogs"])
 
+UPLOAD_DIR = SysPath("static/dogs")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.post("", response_model=DogResponseSchema)
-async def add_dog(data: DogAddSchema, session: SessionDep):
+async def add_dog_with_avatar(
+        session: SessionDep,
+        name: str = Form(...),
+        age: int = Form(...),
+        breed: str = Form(...),
+        description: str = Form(...),
+        intake_date: Optional[str] = Form(None),
+        veterinary_passport: bool = Form(...),
+        gender: GenderEnum = Form(...),
+        file: UploadFile = File(None),
+):
+    image_url = None
+    if file:
+        if file.content_type not in ("image/jpeg", "image/png", "image/jpg"):
+            raise HTTPException(400, "Разрешены только JPEG и PNG изображения")
+
+        ext = file.filename.split(".")[-1].lower() if "." in file.filename else "jpg"
+        filename = f"{uuid.uuid4()}.{ext}"
+        file_path = UPLOAD_DIR / filename
+
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+
+        image_url = f"/static/dogs/{filename}"
+
+    parsed_intake_date = None
+    if intake_date:
+        try:
+            parsed_intake_date = date.fromisoformat(intake_date)
+        except ValueError:
+            raise HTTPException(400, "Неверный формат даты. Используйте YYYY-MM-DD")
+
     new_dog = DogModel(
-        name=data.name,
-        age=data.age,
-        breed=data.breed,
-        description=data.description,
-        intake_date=data.intake_date,
-        veterinary_passport=data.veterinary_passport,
-        gender=data.gender
+        name=name,
+        age=age,
+        breed=breed,
+        description=description,
+        intake_date=parsed_intake_date,
+        veterinary_passport=veterinary_passport,
+        gender=gender,
+        image_url=image_url
     )
+
     session.add(new_dog)
     await session.commit()
+    await session.refresh(new_dog)
     return new_dog
 
 

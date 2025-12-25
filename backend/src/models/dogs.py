@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from __future__ import annotations
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.database import Base
 from src.enums import GenderEnum
 from sqlalchemy import String
@@ -17,3 +18,4 @@ class DogModel(Base):
     intake_date: Mapped[date] = mapped_column(default=date.today, nullable=True)
     veterinary_passport: Mapped[bool]
     gender: Mapped[GenderEnum]
+    image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pydantic import BaseModel, ConfigDict
 from datetime import date
 from src.enums import GenderEnum
@@ -12,7 +13,6 @@ class DogAddSchema(BaseModel):
     veterinary_passport: bool
     gender: GenderEnum
 
-
 class DogResponseSchema(BaseModel):
     id: int
     name: str
@@ -22,6 +22,7 @@ class DogResponseSchema(BaseModel):
     intake_date: date
     veterinary_passport: bool
     gender: GenderEnum
+    image_url: str | None = None
 
     class Config:
         from_attributes = True
