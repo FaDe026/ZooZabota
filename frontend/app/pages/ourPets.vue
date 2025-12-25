@@ -36,7 +36,9 @@ function openTakeModal(dog: Dog) {
 
 function closeTakeModal() {
     isTakeModalOpen.value = false
-    selectedDog.value = undefined
+    if (helperModalLevel.value === 0) {
+        selectedDog.value = undefined
+    }
 }
 
 const openCustodyModal = (dog: Dog) => {
@@ -51,7 +53,9 @@ const openDogModal = (dog: Dog) => {
 
 const closeCustodyModal = () => {
     isCustodyModalOpen.value = false
-    selectedDog.value = undefined
+    if (helperModalLevel.value === 0) {
+        selectedDog.value = undefined
+    }
 }
 
 const closeDogModal = () => {

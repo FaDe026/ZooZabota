@@ -44,9 +44,9 @@ watch(() => isOpen, (newVal) => {
 
 <template>
     <Transition name="modal-transition">
-        <div v-if="isOpen" class="fixed inset-0 bg-primary/40 flex items-center justify-center p-4 overflow-y-scroll"
+        <div v-if="isOpen" class="fixed inset-0 bg-primary/40 flex items-center justify-center p-4 overflow-y-auto"
             @click="clickedOutside" :style="styles">
-            <div class="bg-linear-to-t from-card-bottom-color to-card-top-color rounded-2xl shadow-lg "
+            <div class="bg-linear-to-t from-card-bottom-color to-card-top-color rounded-2xl shadow-lg max-h-full"
                 :class="modalClass" @click.stop>
                 <slot name="beforeHeader"></slot>
                 <div class="flex items-center justify-center relative px-6" :class="headerClass" v-if="hasHeader">
