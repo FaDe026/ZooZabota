@@ -2,17 +2,13 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from src.api.dependencies import SessionDep
 from src.models.dogs import DogModel
 from src.schemas.dogs import DogAddSchema, DogResponseSchema
-from pathlib import Path as SysPath
 from sqlalchemy import select
-import uuid
 from typing import Optional
 from src.enums import GenderEnum
 from datetime import date
+from src.utils.validate_image import validate_and_save_dog_image
 
 router = APIRouter(prefix="/dogs", tags=["Dogs"])
-
-UPLOAD_DIR = SysPath("static/dogs")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.post("", response_model=DogResponseSchema)
 async def add_dog_with_avatar(
@@ -26,19 +22,7 @@ async def add_dog_with_avatar(
         gender: GenderEnum = Form(...),
         file: UploadFile = File(None),
 ):
-    image_url = None
-    if file:
-        if file.content_type not in ("image/jpeg", "image/png", "image/jpg"):
-            raise HTTPException(400, "Разрешены только JPEG и PNG изображения")
-
-        ext = file.filename.split(".")[-1].lower() if "." in file.filename else "jpg"
-        filename = f"{uuid.uuid4()}.{ext}"
-        file_path = UPLOAD_DIR / filename
-
-        with open(file_path, "wb") as f:
-            f.write(await file.read())
-
-        image_url = f"/static/dogs/{filename}"
+    image_url = await validate_and_save_dog_image(file)
 
     parsed_intake_date = None
     if intake_date:
@@ -82,19 +66,41 @@ async def get_dog(dog_id: int, session: SessionDep):
 
 
 @router.put("/{dog_id}", response_model=DogResponseSchema)
-async def put_dog(dog_id: int, data: DogAddSchema, session: SessionDep):
+async def put_dog(
+        dog_id: int,
+        session: SessionDep,
+        name: str = Form(...),
+        age: int = Form(...),
+        breed: str = Form(...),
+        description: str = Form(...),
+        intake_date: Optional[str] = Form(None),
+        veterinary_passport: bool = Form(...),
+        gender: GenderEnum = Form(...),
+        file: UploadFile = File(None)):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)
     dog = result.scalar_one_or_none()
     if dog is None:
         raise HTTPException(status_code=404, detail="Информация о собаке не найдена")
-    dog.name = data.name
-    dog.age = data.age
-    dog.breed = data.breed
-    dog.description = data.description
-    dog.intake_date = data.intake_date
-    dog.veterinary_passport = data.veterinary_passport
-    dog.gender = data.gender
+
+    image_url = await validate_and_save_dog_image(file)
+
+    parsed_intake_date = None
+    if intake_date:
+        try:
+            parsed_intake_date = date.fromisoformat(intake_date)
+        except ValueError:
+            raise HTTPException(400, "Неверный формат даты. Используйте YYYY-MM-DD")
+
+
+    dog.name = name
+    dog.age = age
+    dog.breed = breed
+    dog.description = description
+    dog.intake_date = parsed_intake_date if parsed_intake_date is not None else date.today
+    dog.veterinary_passport = veterinary_passport
+    dog.gender = gender
+    dog.image_url = image_url
 
     session.add(dog)
     await session.commit()
