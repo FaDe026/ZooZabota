@@ -7,6 +7,7 @@ from typing import Optional
 from src.enums import GenderEnum
 from datetime import date
 from src.utils.validate_image import validate_and_save_dog_image
+from pathlib import Path
 
 router = APIRouter(prefix="/dogs", tags=["Dogs"])
 
@@ -109,7 +110,18 @@ async def put_dog(
 
 
 @router.patch("/{dog_id}", response_model=DogResponseSchema)
-async def partial_update_dog(dog_id: int, data: DogAddSchema, session: SessionDep):
+async def partial_update_dog(
+        dog_id: int,
+        session: SessionDep,
+        name: Optional[str] = Form(None),
+        age: Optional[int] = Form(None),
+        breed: Optional[str] = Form(None),
+        description: Optional[str] = Form(None),
+        intake_date: Optional[str] = Form(None),
+        veterinary_passport: Optional[bool] = Form(None),
+        gender: Optional[GenderEnum] = Form(None),
+        file: UploadFile = File(None)
+):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)
     dog = result.scalar_one_or_none()
@@ -117,7 +129,31 @@ async def partial_update_dog(dog_id: int, data: DogAddSchema, session: SessionDe
     if dog is None:
         raise HTTPException(status_code=404, detail="Информация о собаке не найдена")
 
-    update_dict = data.dict(exclude_unset=True)
+    update_dict = {}
+
+    if name is not None:
+        update_dict["name"] = name
+    if age is not None:
+        update_dict["age"] = age
+    if breed is not None:
+        update_dict["breed"] = breed
+    if description is not None:
+        update_dict["description"] = description
+    if veterinary_passport is not None:
+        update_dict["veterinary_passport"] = veterinary_passport
+    if gender is not None:
+        update_dict["gender"] = gender
+
+    if intake_date is not None:
+        try:
+            parsed_intake_date = date.fromisoformat(intake_date)
+            update_dict["intake_date"] = parsed_intake_date
+        except ValueError:
+            raise HTTPException(400, "Неверный формат даты. Используйте YYYY-MM-DD")
+
+    if file:
+        image_url = await validate_and_save_dog_image(file)
+        update_dict["image_url"] = image_url
 
     for key, value in update_dict.items():
         setattr(dog, key, value)
@@ -128,7 +164,7 @@ async def partial_update_dog(dog_id: int, data: DogAddSchema, session: SessionDe
     return dog
 
 
-@router.delete("/{dog_id}", response_model=DogResponseSchema)
+@router.delete("/{dog_id}")
 async def delete_dog(dog_id: int, session: SessionDep):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)
@@ -136,6 +172,13 @@ async def delete_dog(dog_id: int, session: SessionDep):
 
     if dog is None:
         raise HTTPException(status_code=404, detail="Информация о собаке не найдена")
+
+    if dog.image_url:
+        relative_path = dog.image_url.lstrip("/")
+        file_path = Path(relative_path)
+        if file_path.exists():
+            file_path.unlink()
+
 
     await session.delete(dog)
     await session.commit()
