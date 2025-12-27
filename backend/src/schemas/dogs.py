@@ -26,3 +26,10 @@ class DogResponseSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class DogImagesRandomSchema(BaseModel):
+    id: int
+    image_url: str
+
+    class Config:
+        from_attributes = True

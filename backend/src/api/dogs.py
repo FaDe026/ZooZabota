@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from src.api.dependencies import SessionDep
 from src.models.dogs import DogModel
-from src.schemas.dogs import DogAddSchema, DogResponseSchema
-from sqlalchemy import select
+from src.schemas.dogs import DogAddSchema, DogResponseSchema, DogImagesRandomSchema
+from sqlalchemy import select, func
 from typing import Optional
 from src.enums import GenderEnum
 from datetime import date
@@ -47,6 +47,15 @@ async def add_dog_with_avatar(
     await session.commit()
     await session.refresh(new_dog)
     return new_dog
+
+
+@router.get("/random", response_model=list[DogImagesRandomSchema])
+async def get_random_dogs(session: SessionDep):
+    query = select(DogModel).where(DogModel.image_url.isnot(None)).order_by(func.random()).limit(5)
+    result = await session.execute(query)
+    dogs = result.scalars().all()
+    return dogs
+
 
 
 @router.get("", response_model=list[DogResponseSchema])
