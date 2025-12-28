@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from src.models.user import UserModel
 from src.database import async_sessionmaker, engine
-from sqlalchemy.ext.asyncio import AsyncSession
+from src.utils.hashing import get_password_hash
 
 async def create_admin_user():
     async with engine.begin() as conn:
@@ -15,7 +15,7 @@ async def create_admin_user():
             if not existing_user:
                 admin = UserModel(
                     username="admin",
-                    password="admin",
+                    password=get_password_hash("admin"),
                     email="admin@example.com",
                     role="Admin"
                 )

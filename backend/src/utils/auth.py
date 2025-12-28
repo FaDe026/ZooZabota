@@ -3,16 +3,13 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_session
 from src.models.user import UserModel
 import os
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login",
-    auto_error=False
-)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 class TokenData(BaseModel):
     user_id: str
