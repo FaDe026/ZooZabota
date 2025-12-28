@@ -6,7 +6,7 @@ from src.models.news import NewsModel
 from src.schemas.news import NewsAddSchema, NewsGetSchema
 from datetime import datetime
 from src.models.user import UserModel
-from src.api.auth import get_current_user
+from src.utils.auth import get_current_user
 
 router = APIRouter(prefix="/news", tags=["News"])
 
