@@ -1,5 +1,4 @@
-from pydantic import BaseModel, field_serializer
-from datetime import datetime
+from pydantic import BaseModel
 
 
 class UserAddSchema(BaseModel):

@@ -2,6 +2,10 @@ from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime
 from src.database import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.models.news import NewsModel
 
 class UserModel(Base):
     __tablename__ = 'user'
