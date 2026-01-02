@@ -90,3 +90,24 @@ class GuardianRequestResponseSchema(GuardianRequestBaseSchema):
     request_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RequestPatchSchema(BaseModel):
+    dog_id: Optional[int] = None
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    status: Optional[RequestStatusEnum] = None
+    type: Optional[RequestTypeEnum] = None
+    adoption_details: Optional[AdoptionRequestBaseSchema] = None
+    guardian_details: Optional[GuardianRequestBaseSchema] = None
+
+    @model_validator(mode='after')
+    def validate_adoption_details_for_type(self) -> 'RequestPatchSchema':
+        if self.type == RequestTypeEnum.ADOPTION_REQUEST and self.adoption_details is None:
+            raise ValueError(
+                "При типе заявки 'Усыновление' необходимо указать adoption_details"
+            )
+        return self
+
+    model_config = ConfigDict(extra="forbid")
