@@ -13,10 +13,12 @@ definePageMeta({
                 <span>Требуют внимания: 4</span>
             </div>
             <div class="flex flex-col gap-2">
-                <a href=""
-                    class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">Заявки</a>
-                <a href=""
-                    class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">Животные</a>
+                <NuxtLink href="/admin/application"
+                    class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">
+                    Заявки</NuxtLink>
+                <NuxtLink href="/admin/pets"
+                    class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">
+                    Животные</NuxtLink>
                 <a href=""
                     class="card-bg card-shadow py-4 text-center rounded-xl text-2xl transition-transform hover:-translate-y-1">Новости</a>
             </div>

@@ -36,10 +36,11 @@ function hamburgerClicked() {
             </div>
             <nav :class="navClasses"
                 class="flex flex-col justify-evenly w-full max-h-0 transition-[max-height] duration-350 overflow-hidden divide-hidden sm:max-h-200 sm:flex-row sm:divide-solid sm:divide-x divide-nav-border">
-                <a href="/ourPets" class="nav-btn">Наши питомцы</a>
-                <a href="" class="nav-btn">Приют</a>
-                <a href="/news" class="nav-btn">Новости</a>
-                <a href="" class="nav-btn">Контакты</a>
+                <NuxtLink href="/" class="nav-btn sm:hidden">Главная</NuxtLink>
+                <NuxtLink href="/ourPets" class="nav-btn">Наши питомцы</NuxtLink>
+                <NuxtLink href="/help" class="nav-btn sm:hidden">Помочь приюту</NuxtLink>
+                <NuxtLink href="/news" class="nav-btn">Новости</NuxtLink>
+                <NuxtLink href="" class="nav-btn">Контакты</NuxtLink>
             </nav>
         </div>
     </header>
