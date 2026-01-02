@@ -9,6 +9,7 @@
 DB_NAME=zoozabota_db
 DB_USER=zoozabota_user
 DB_PASSWORD=super_secret_password_123
+JWT_SECRET_KEY=JWT_SECRET_KEY=a3f8d1e9c4b2a7f0e5d6c9b8a1f2e3d4c7b6a5f8e9d0c1b2a3f4e5d6c7b8a9f0
 ```
 
 ## 🚀 Запуск приложения
