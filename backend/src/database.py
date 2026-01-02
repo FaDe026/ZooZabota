@@ -29,3 +29,4 @@ from .models.news import NewsModel
 from .models.user import UserModel
 from .models.tags import TagModel
 from .models.tags_dogs import tag_dog
+from .models.requests import RequestModel, AdoptionRequestModel, GuardianRequestModel
