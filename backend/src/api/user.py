@@ -5,6 +5,7 @@ from src.database import get_session
 from src.models.user import UserModel
 from src.schemas.user import UserAddSchema, UserGetSchema
 from src.utils.hashing import get_password_hash
+from src.utils.auth import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -12,7 +13,8 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.post("/", response_model=UserGetSchema)
 async def add_user(
     user_data: UserAddSchema,
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    current_user: UserModel = Depends(get_current_user)
 ):
     """Создать нового пользователя"""
     existing_username = await session.execute(
@@ -61,7 +63,8 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_sessi
 async def update_user(
     user_id: int,
     user_data: UserAddSchema,
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    current_user: UserModel = Depends(get_current_user)
 ):
     """Обновить пользователя"""
     query = select(UserModel).where(UserModel.id == user_id)
@@ -95,7 +98,7 @@ async def update_user(
 
 
 @router.delete("/{user_id}")
-async def delete_user(user_id: int, session: AsyncSession = Depends(get_session)):
+async def delete_user(user_id: int, session: AsyncSession = Depends(get_session), current_user: UserModel = Depends(get_current_user)):
     query = select(UserModel).where(UserModel.id == user_id)
     result = await session.execute(query)
     user = result.scalar_one_or_none()

@@ -221,7 +221,7 @@ async def partial_update_news(
 
 
 @router.delete("/{news_id}")
-async def delete_news(news_id: int, session: AsyncSession = Depends(get_session)):
+async def delete_news(news_id: int, session: AsyncSession = Depends(get_session), current_user: UserModel = Depends(get_current_user)):
     """Удалить новость и связанные данные."""
     result = await session.execute(select(NewsModel).where(NewsModel.id == news_id))
     news = result.scalar_one_or_none()
