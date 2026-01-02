@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict
+from __future__ import annotations
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional, Literal
 from src.enums import RequestStatusEnum, FamilyMemberCountEnum, PetExperienceEnum, AdoptionPurposeEnum, HousingTypeEnum, HousingAreaEnum, RequestTypeEnum
@@ -14,6 +15,28 @@ class RequestBaseSchema(BaseModel):
 
 class RequestCreateSchema(RequestBaseSchema):
     type: RequestTypeEnum
+    adoption_details: Optional[AdoptionRequestBaseSchema] = None
+    guardian_details: Optional[GuardianRequestBaseSchema] = None
+
+    @field_validator('adoption_details')
+    @classmethod
+    def validate_adoption_details(cls, v, info):
+        req_type = info.data.get('type')
+        if req_type == RequestTypeEnum.ADOPTION_REQUEST and v is None:
+            raise ValueError("Для подачи заявки на усыновление необходимо предоставить подробную информацию об усыновлении")
+        if req_type != RequestTypeEnum.ADOPTION_REQUEST and v is not None:
+            raise ValueError("Тип заявки должен быть Усыновление")
+        return v
+
+    @field_validator('guardian_details')
+    @classmethod
+    def validate_guardian_details(cls, v, info):
+        req_type = info.data.get('type')
+        if req_type == RequestTypeEnum.GUARDIAN_REQUEST and v is None:
+            return GuardianRequestBaseSchema()
+        if req_type != RequestTypeEnum.GUARDIAN_REQUEST and v is not None:
+            raise ValueError("Тип заявки должен быть Опека")
+        return v
 
 
 class RequestResponseSchema(RequestBaseSchema):
@@ -21,9 +44,10 @@ class RequestResponseSchema(RequestBaseSchema):
     created_at: datetime
     closed_at: Optional[datetime] = None
     type: RequestTypeEnum
+    adoption_request: Optional[AdoptionRequestBaseSchema] = None
+    guardian_request: Optional[GuardianRequestBaseSchema] = None
 
     model_config = ConfigDict(from_attributes=True)
-
 
 class AdoptionRequestBaseSchema(BaseModel):
     family_member_count: FamilyMemberCountEnum

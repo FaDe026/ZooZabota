@@ -4,6 +4,7 @@ from src.database import Base
 from datetime import datetime
 from typing import Optional
 from src.enums import RequestStatusEnum, FamilyMemberCountEnum, PetExperienceEnum, AdoptionPurposeEnum, HousingTypeEnum, HousingAreaEnum, RequestTypeEnum
+from sqlalchemy import ForeignKey
 
 class RequestModel(Base):
     __tablename__ = 'request'
@@ -18,13 +19,23 @@ class RequestModel(Base):
     email: Mapped[str]
     status: Mapped[RequestStatusEnum]
 
+    adoption_request: Mapped[Optional["AdoptionRequestModel"]] = relationship(
+        back_populates="request", cascade="all, delete-orphan"
+    )
+    guardian_request: Mapped[Optional["GuardianRequestModel"]] = relationship(
+        back_populates="request", cascade="all, delete-orphan"
+    )
 
 
 class AdoptionRequestModel(Base):
     __tablename__ = 'adoption_request'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    request_id: Mapped[int] = mapped_column(nullable=False, unique=True)
+    request_id: Mapped[int] = mapped_column(
+        ForeignKey("request.id"),
+        nullable=False,
+        unique=True
+    )
 
     family_member_count: Mapped[FamilyMemberCountEnum]
     had_experience_adoption_pet: Mapped[PetExperienceEnum]
@@ -32,9 +43,21 @@ class AdoptionRequestModel(Base):
     housing_type: Mapped[HousingTypeEnum]
     housing_area: Mapped[HousingAreaEnum]
 
+    request: Mapped["RequestModel"] = relationship(
+        back_populates="adoption_request"
+    )
+
 
 class GuardianRequestModel(Base):
     __tablename__ = 'guardian_request'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    request_id: Mapped[int] = mapped_column(nullable=False, unique=True)
+    request_id: Mapped[int] = mapped_column(
+        ForeignKey("request.id"),
+        nullable=False,
+        unique=True
+    )
+
+    request: Mapped["RequestModel"] = relationship(
+        back_populates="guardian_request"
+    )
