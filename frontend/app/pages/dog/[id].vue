@@ -31,7 +31,7 @@
                                 </div>
                                 <div class="flex items-center">
                                     <span class="text-text-secondary">Ветпаспорт: {{ dog.hasPassport ? 'есть' : 'нет'
-                                        }}</span>
+                                    }}</span>
                                 </div>
                             </div>
 
@@ -61,7 +61,7 @@
                     </NuxtLink>
                 </div>
                 <CustodyModal :is-open="isCustodyModalOpen" :dog="dog" @close="closeCustodyModal"
-                    @submit="handleCustodySubmit" />
+                    @submit="handleCustodySubmit" :level="0" />
             </div>
         </main>
     </div>

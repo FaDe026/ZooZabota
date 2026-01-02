@@ -17,7 +17,7 @@ declare global {
         breed: string
         description: string
         intake_date: string
-        vetirinary_passport: boolean
+        veterinary_passport: boolean
         gender: DogGender
 
         tags: string[]

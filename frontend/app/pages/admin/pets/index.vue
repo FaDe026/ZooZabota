@@ -1,9 +1,32 @@
 <script lang="ts" setup>
+import { DogGender } from '~/types/dogGender'
+
 definePageMeta({
     layout: "admin"
 })
 
 const router = useRouter()
+const { data: dogs, error } = useServerFetch<Dog[]>("/dogs")
+
+const isDogListEmpty = computed(() => {
+    return dogs.value && dogs.value.length === 0
+})
+
+const isErrorPresent = computed(() => {
+    return error.value !== undefined
+})
+
+function hasVeterinaryPassport(dog: Dog | undefined) {
+    if (!dog) return ""
+    return (dog.veterinary_passport) ? "есть" : "нет"
+}
+
+
+
+function dogGender(dog: Dog | undefined) {
+    if (!dog) return ""
+    return (dog.gender === DogGender.male) ? "Мужской" : "Женский"
+}
 
 function backClicked() {
     router.back()
@@ -29,17 +52,17 @@ function backClicked() {
         </div>
 
         <div class="flex flex-col gap-2 base-container mx-auto">
-            <div class="flex card-bg card-shadow rounded-xl px-4 py-2">
+            <div v-for="dog in dogs" class="flex card-bg card-shadow rounded-xl px-4 py-2">
                 <div class="flex flex-col grow">
-                    <h2 class="text-text-primary text-xl mb-1">Марс</h2>
+                    <h2 class="text-text-primary text-xl mb-1">{{ dog.name }}</h2>
                     <div class="flex flex-col text-text-secondary">
-                        <span>Пол: Мужской</span>
-                        <span>Возраст: 2 года</span>
-                        <span>Наличие ветпаспорта: есть</span>
+                        <span>Пол: {{ dogGender(dog) }}</span>
+                        <span>Возраст: {{ ageText(dog) }}</span>
+                        <span>Наличие ветпаспорта: {{ hasVeterinaryPassport(dog) }}</span>
                     </div>
                 </div>
                 <div class="flex items-center">
-                    <button class="btn px-6 w-fit">Просмотр</button>
+                    <NuxtLink :href="`/admin/pets/${dog.id}`" class="btn px-6 w-fit">Просмотр</NuxtLink>
                 </div>
             </div>
         </div>
