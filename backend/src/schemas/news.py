@@ -1,5 +1,7 @@
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel, field_serializer, ConfigDict
 from datetime import datetime
+from typing import List
+from .tags import TagResponseSchema
 
 
 class NewsAddSchema(BaseModel):
@@ -15,12 +17,11 @@ class NewsGetSchema(BaseModel):
     date: datetime
     body: str
     author_id: int
-    tags: str | None = None
+    tags: List[TagResponseSchema]
     preview: str | None = None
     image_url: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @field_serializer('date')
     def serialize_date(self, dt: datetime) -> str:
