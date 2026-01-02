@@ -45,17 +45,7 @@ async def add_news(
     """Создать новую новость с привязкой тегов по ID."""
     image_url = await validate_and_save_news_image(file)
 
-    new_news = NewsModel(
-        title=title,
-        date=datetime.now().replace(microsecond=0),
-        body=body,
-        author_id=current_user.id,
-        preview=preview,
-        image_url=image_url,
-    )
-    session.add(new_news)
-    await session.flush()
-
+    news_tags = []
     if tag_ids:
         ids = parse_tag_ids(tag_ids)
         if ids:
@@ -68,8 +58,18 @@ async def add_news(
                     status_code=400,
                     detail=f"Теги с ID {sorted(missing)} не найдены."
                 )
-            new_news.tags = found_tags
+            news_tags = found_tags
 
+    new_news = NewsModel(
+        title=title,
+        date=datetime.now().replace(microsecond=0),
+        body=body,
+        author_id=current_user.id,
+        preview=preview,
+        image_url=image_url,
+        tags=news_tags,
+    )
+    session.add(new_news)
     await session.commit()
     await session.refresh(new_news, attribute_names=["tags", "author"])
     return new_news
