@@ -1,7 +1,7 @@
-from pydantic import BaseModel, field_serializer, ConfigDict
 from datetime import datetime
 from typing import List
-from .tags import TagResponseSchema
+from pydantic import BaseModel, field_serializer, ConfigDict
+from src.schemas.tags import TagResponseSchema
 
 
 class NewsAddSchema(BaseModel):

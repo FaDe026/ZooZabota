@@ -1,8 +1,8 @@
+from datetime import datetime
+from typing import TYPE_CHECKING, List
 from sqlalchemy import String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from datetime import datetime
 from src.database import Base
-from typing import TYPE_CHECKING, List
 from src.models.tags_news import tag_news
 
 if TYPE_CHECKING:

@@ -1,8 +1,8 @@
 from __future__ import annotations
-from pydantic import BaseModel, ConfigDict
 from datetime import date
-from src.enums import GenderEnum
 from typing import List
+from pydantic import BaseModel
+from src.enums import GenderEnum
 from src.schemas.tags import TagResponseSchema
 
 class DogAddSchema(BaseModel):

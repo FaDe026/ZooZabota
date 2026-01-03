@@ -1,12 +1,12 @@
 from __future__ import annotations
+from typing import List
+from datetime import date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String
+from sqlalchemy import Text
+from src.models.tags_dogs import tag_dog
 from src.database import Base
 from src.enums import GenderEnum
-from sqlalchemy import String
-from datetime import date
-from sqlalchemy import Text
-from typing import List
-from src.models.tags_dogs import tag_dog
 
 class DogModel(Base):
     __tablename__ = 'dog'

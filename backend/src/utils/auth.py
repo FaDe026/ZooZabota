@@ -1,4 +1,4 @@
-from fastapi.security import OAuth2PasswordBearer
+import os
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from jose import JWTError, jwt
@@ -7,7 +7,6 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_session
 from src.models.user import UserModel
-import os
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -42,8 +41,8 @@ async def get_current_user(
         if user_id is None:
             raise credentials_exception
         token_data = TokenData(user_id=user_id)
-    except JWTError:
-        raise credentials_exception
+    except JWTError as exc:
+        raise credentials_exception from exc
 
     user = await session.get(UserModel, int(token_data.user_id))
     if user is None:

@@ -1,18 +1,18 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
-from src.api.dependencies import SessionDep
-from src.models.dogs import DogModel
-from src.schemas.dogs import DogAddSchema, DogResponseSchema, DogImagesRandomSchema
-from sqlalchemy import select, func
-from typing import Optional
-from src.enums import GenderEnum
 from datetime import date
-from src.utils.validate_image import validate_and_save_dog_image
+from typing import Optional
 from pathlib import Path
-from src.models.tags import TagModel
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
+from src.enums import GenderEnum
+from src.utils.validate_image import validate_and_save_dog_image
+from src.models.tags import TagModel
 from src.utils.validate_array import parse_tag_ids
 from src.utils.auth import UserModel
 from src.utils.auth import get_current_user
+from src.api.dependencies import SessionDep
+from src.models.dogs import DogModel
+from src.schemas.dogs import DogResponseSchema, DogImagesRandomSchema
 
 router = APIRouter(prefix="/dogs", tags=["Dogs"])
 
@@ -36,8 +36,8 @@ async def add_dog_with_avatar(
     if intake_date:
         try:
             parsed_intake_date = date.fromisoformat(intake_date)
-        except ValueError:
-            raise HTTPException(400, "Неверный формат даты. Используйте YYYY-MM-DD")
+        except ValueError as exc:
+            raise HTTPException(400, "Неверный формат даты. Используйте YYYY-MM-DD") from exc
 
     tags = []
     if tag_ids:
@@ -47,7 +47,8 @@ async def add_dog_with_avatar(
                 raise ValueError
             ids_list = [int(i) for i in ids_list]
         except (ValueError, TypeError):
-            raise HTTPException(400, "tag_ids должен быть JSON-списком целых чисел, например: [1,2,3]")
+            raise HTTPException(400, "tag_ids должен быть "
+                                     "JSON-списком целых чисел, например: [1,2,3]")
 
         result = await session.execute(select(TagModel).where(TagModel.id.in_(ids_list)))
         tags = result.scalars().all()
@@ -233,7 +234,9 @@ async def partial_update_dog(
 
 
 @router.delete("/{dog_id}")
-async def delete_dog(dog_id: int, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
+async def delete_dog(dog_id: int,
+                     session: SessionDep,
+                     current_user: UserModel = Depends(get_current_user)):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)
     dog = result.scalar_one_or_none()

@@ -1,10 +1,13 @@
 from __future__ import annotations
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from src.database import Base
 from datetime import datetime
 from typing import Optional
-from src.enums import RequestStatusEnum, FamilyMemberCountEnum, PetExperienceEnum, AdoptionPurposeEnum, HousingTypeEnum, HousingAreaEnum, RequestTypeEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
+from src.database import Base
+from src.enums import (RequestStatusEnum, FamilyMemberCountEnum,
+                       PetExperienceEnum, AdoptionPurposeEnum,
+                       HousingTypeEnum, HousingAreaEnum,
+                       RequestTypeEnum)
 
 class RequestModel(Base):
     __tablename__ = 'request'

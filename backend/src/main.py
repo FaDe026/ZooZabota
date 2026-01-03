@@ -1,11 +1,10 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from src.api import main_router
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from src.utils.init_db import create_admin_user
+from src.api import main_router
 
-app = FastAPI()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,4 +22,3 @@ app.add_middleware(
 
 app.include_router(main_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
-

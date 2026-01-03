@@ -1,7 +1,7 @@
+import os
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
@@ -23,11 +23,3 @@ async def get_session():
 
 class Base(DeclarativeBase):
     pass
-
-from .models.dogs import DogModel
-from .models.news import NewsModel
-from .models.user import UserModel
-from .models.tags import TagModel
-from .models.tags_dogs import tag_dog
-from .models.tags_news import tag_news
-from .models.requests import RequestModel, AdoptionRequestModel, GuardianRequestModel

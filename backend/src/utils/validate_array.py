@@ -5,8 +5,9 @@ def parse_tag_ids(tag_ids_str: str | None) -> list[int]:
         return []
     try:
         return [int(x.strip()) for x in tag_ids_str.split(",") if x.strip()]
-    except ValueError:
+    except ValueError as exc:
         raise HTTPException(
             status_code=400,
-            detail="Неверный формат tag_ids. Ожидаются целые числа, разделённые запятыми (например: 1,2,3)."
-        )
+            detail="Неверный формат tag_ids."
+                   "Ожидаются целые числа, разделённые запятыми (например: 1,2,3)."
+        ) from exc

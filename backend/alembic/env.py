@@ -6,6 +6,13 @@ from alembic import context
 import os
 import sys
 from src.database import Base, engine
+from src.models.dogs import DogModel
+from src.models.news import NewsModel
+from src.models.user import UserModel
+from src.models.tags import TagModel
+from src.models.tags_dogs import tag_dog
+from src.models.tags_news import tag_news
+from src.models.requests import RequestModel, AdoptionRequestModel, GuardianRequestModel
 
 config = context.config
 

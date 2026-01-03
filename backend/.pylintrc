@@ -445,7 +445,9 @@ disable=raw-checker-failed,
         deprecated-pragma,
         use-implicit-booleaness-not-comparison-to-string,
         use-implicit-booleaness-not-comparison-to-zero,
-        use-symbolic-message-instead
+        use-symbolic-message-instead,
+        missing-docstring,
+        too-few-public-methods
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -655,3 +657,6 @@ init-import=no
 # List of qualified module names which can have objects that can redefine
 # builtins.
 redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io
+
+[MASTER]
+init-hook='import sys; sys.path.insert(0, ".")'
