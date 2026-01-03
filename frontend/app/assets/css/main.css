@@ -18,6 +18,9 @@
   --color-nav-border: hsl(186, 42%, 28%);
   --color-alert: hsla(17, 100%, 71%, 1);
 
+  --color-error: hsl(0, 70%, 55%);
+  --color-success: hsl(104, 50%, 50%);
+
   --font-cuprum: "Cuprum";
 
   --color-pagination-inactive: hsl(0, 0%, 64%);

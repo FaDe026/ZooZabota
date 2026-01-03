@@ -1,8 +1,11 @@
 <template>
     <header class="sticky sm:relative top-0 z-20 w-full bg-primary text-bg flex justify-center">
         <div class="w-full">
-            <div class="flex justify-between items-center w-full px-5 py-5">
-                <h1 class="uppercase text-4xl sm:text-7xl tracking-wider">Ковчег</h1>
+            <div class="flex justify-center items-center w-full px-5 py-5">
+                <NuxtLink to="/admin">
+                    <img width="55" height="55" class="object-cover brightness-0 invert-100" src="/images/logo.png"
+                        alt="Логотип">
+                </NuxtLink>
             </div>
         </div>
     </header>

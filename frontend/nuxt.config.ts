@@ -21,4 +21,9 @@ export default defineNuxtConfig({
     mode: "svg",
     cssLayer: "base",
   },
+  runtimeConfig: {
+    public: {
+      apiBase: "http://localhost:8000"
+    }
+  }
 });

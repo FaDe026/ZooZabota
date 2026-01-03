@@ -1,25 +1,30 @@
 <script setup lang="ts">
+import { baseModalProps } from '~/shared/props/modalProps';
+
 
 const emit = defineEmits<{
     (e: 'close'): void
 }>()
 
-const { isOpen, title = "Заголовок", modalClass = "", headerClass = "" } = defineProps<{
-    isOpen: boolean,
-    title?: string,
-    modalClass?: string,
-    headerClass?: string
-}>()
+const { isOpen, title = "Заголовок", modalClass = "", headerClass = "", level = 0, hasHeader = true } = defineProps(baseModalProps)
+
+const styles = computed(() => {
+    return {
+        zIndex: `${50 + level}`
+    }
+})
 
 function closeModal() {
     emit('close')
 }
 
 function disableBodyScroll() {
+    if (level > 0) return
     document.body.style.overflow = 'hidden'
 }
 
 function enableBodyScroll() {
+    if (level > 0) return
     document.body.style.overflow = ''
 }
 
@@ -39,12 +44,12 @@ watch(() => isOpen, (newVal) => {
 
 <template>
     <Transition name="modal-transition">
-        <div v-if="isOpen" class="fixed inset-0 bg-primary/40 flex items-center justify-center z-50 p-4"
-            @click="clickedOutside">
-            <div class="bg-linear-to-t from-card-bottom-color to-card-top-color rounded-2xl shadow-lg max-w-md w-full"
+        <div v-if="isOpen" class="fixed inset-0 bg-primary/40 flex items-center justify-center p-4 overflow-y-auto"
+            @click="clickedOutside" :style="styles">
+            <div class="bg-linear-to-t from-card-bottom-color to-card-top-color rounded-2xl shadow-lg max-h-full"
                 :class="modalClass" @click.stop>
                 <slot name="beforeHeader"></slot>
-                <div class="flex items-center justify-center relative px-6" :class="headerClass">
+                <div class="flex items-center justify-center relative px-6" :class="headerClass" v-if="hasHeader">
                     <h2 class="text-xl font-medium text-center">{{ title }}</h2>
                     <button @click="closeModal"
                         class="absolute right-6 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-primary transition-colors">

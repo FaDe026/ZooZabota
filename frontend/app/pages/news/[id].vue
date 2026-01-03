@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 const router = useRouter()
+const route = useRoute()
+const { data, error, pending } = useServerFetch<News>(`/news/${route.params.id}`)
 
 function backClicked() {
     router.back()
@@ -17,33 +19,13 @@ function backClicked() {
                     stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            <h1 class="text-2xl text-primary text-center font-bold">Пропала собака</h1>
+            <h1 class="text-2xl text-primary text-center font-bold">{{ data?.title }}</h1>
         </div>
         <div class="base-container flex flex-col mx-auto">
             <img class="w-full aspect-video object-cover rounded-xl shadow-xl/10 self-center" src="/images/news/1.png"
                 alt="">
             <div class="text-text-primary text-lg">
-                Пропала собака! Заволжский район
-                Друзья, жители района «Зеленый Бор» и все неравнодушные! Наша семья в отчаянии: 15 октября, во вторник
-                днем, пропала наша любимая собака по кличке Буся.
-                <br>
-                <br>
-                Буся — девочка, палевого окраса, 3 года. Пропала в районе Центрального парка, недалеко от детской
-                площадки. Очень добрая, общительная и совершенно неагрессивная.
-                <br> 
-                <br> 
-                ОСОБЫЕ ПРИМЕТЫ:
-                <br>  
-                На левом ухе небольшой светлый шрам (с детства).
-                <br>
-                <br>
-                Мы очень по ней скучаем. Для наших детей — это член семьи. Любая информация может быть решающей!
-                <br>
-                <br>
-                Если вы видели Бусю, брали ее к себе или знаете, где она может находиться, позвоните в любое время:
-                <br>
-                <br>
-                +7 (XXX) XXX-XX-XX (Анна)
+                {{ data?.body }}
             </div>
         </div>
     </section>

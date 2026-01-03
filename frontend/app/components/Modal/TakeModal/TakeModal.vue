@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 
 import { TakeModalFirstPage, TakeModalSecondPage, TakeModalFourthPage, TakeModalThirdPage } from "#components"
+import { baseModalProps } from "~/shared/props/modalProps";
 
-const { isOpen } = defineProps<{
-    isOpen: boolean
-}>()
+const { isOpen } = defineProps(baseModalProps)
 
 const currentTab = ref(0)
 const isNotLastTab = computed(() => {
@@ -61,7 +60,7 @@ watch(() => isOpen, (newVal) => {
 </script>
 
 <template>
-    <Modal @close="closeModal" title="Забрать друга" :is-open="isOpen">
+    <Modal @close="closeModal" title="Забрать друга" :is-open="isOpen" :level="level" modal-class="w-full sm:max-w-md">
         <template #beforeHeader>
             <Stepper :count="3" :current="currentTab"></Stepper>
         </template>

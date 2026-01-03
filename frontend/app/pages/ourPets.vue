@@ -1,3 +1,91 @@
+<script setup lang="ts">
+import { DogGender } from '~/types/dogGender'
+
+const isCustodyModalOpen = ref(false)
+const isTakeModalOpen = ref(false)
+const isDogModalOpen = ref(false)
+
+const selectedDog = ref<Dog | undefined>(undefined)
+const emptyDog = {
+    id: -1,
+    name: "",
+    gender: DogGender.female,
+    vetirinary_passport: false,
+    description: "",
+    intake_date: ""
+} as Dog
+
+const dogToDisplay = computed(() => {
+    if (selectedDog.value) {
+        return selectedDog.value
+    }
+    return emptyDog
+})
+
+const helperModalLevel = computed(() => {
+    if (isDogModalOpen.value) {
+        return 1
+    }
+    return 0
+})
+
+function openTakeModal(dog: Dog) {
+    isTakeModalOpen.value = true
+    selectedDog.value = dog
+}
+
+function closeTakeModal() {
+    isTakeModalOpen.value = false
+    if (helperModalLevel.value === 0) {
+        selectedDog.value = undefined
+    }
+}
+
+const openCustodyModal = (dog: Dog) => {
+    selectedDog.value = dog
+    isCustodyModalOpen.value = true
+}
+
+const openDogModal = (dog: Dog) => {
+    selectedDog.value = dog
+    isDogModalOpen.value = true
+}
+
+const closeCustodyModal = () => {
+    isCustodyModalOpen.value = false
+    if (helperModalLevel.value === 0) {
+        selectedDog.value = undefined
+    }
+}
+
+const closeDogModal = () => {
+    isDogModalOpen.value = false
+}
+
+
+
+function handleTakeSumbit() {
+    closeTakeModal()
+}
+
+const handleCustodySubmit = (formData: any) => {
+    console.log('Данные формы опеки:', formData)
+    alert('Заявка на опеку отправлена! Мы свяжемся с вами в ближайшее время.')
+    closeCustodyModal()
+}
+
+const { data: dogs, error } = useServerFetch<Dog[]>("/dogs")
+
+const isDogListEmpty = computed(() => {
+    return dogs.value && dogs.value.length === 0
+})
+
+const isErrorPresent = computed(() => {
+    return error.value !== undefined
+})
+
+</script>
+
 <template>
     <div class="min-h-screen bg-bg font-cuprum">
         <main class="base-section pt-10">
@@ -16,135 +104,27 @@
                         <Icon name="material-symbols:keyboard-arrow-down" class="text-2xl" />
                     </button>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <div v-for="dog in dogs" :key="dog.id"
-                        class="bg-linear-to-b from-white to-[#F9F7F2] rounded-2xl overflow-hidden shadow-lg border border-gray-200 cursor-pointer transition-transform hover:scale-105 duration-300">
-                        <NuxtLink :to="`/dog/${dog.id}`" class="block">
-                            <div class="w-full h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
-                                <img v-if="dog.image" :src="dog.image" :alt="dog.name"
-                                    class="w-full h-full object-cover">
-                                <Icon v-else name="material-symbols:pets" class="text-6xl text-text-secondary" />
-                            </div>
-
-                            <div class="p-6">
-                                <h3 class="section-title flex justify-center items-center">{{ dog.name }}</h3>
-
-                                <div class="flex flex-col gap-2 mb-4">
-                                    <div class="flex items-center">
-                                        <span class="text-text-secondary">Пол: {{ dog.gender }}</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="text-text-secondary">Возраст: {{ dog.age }}</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="text-text-secondary">Ветпаспорт: {{ dog.hasPassport ? 'есть' :
-                                            'нет' }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-wrap gap-2 mb-6">
-                                    <span v-for="tag in dog.tags" :key="tag"
-                                        class="bg-transparent border-2 border-accent text-accent text-xl font-normal rounded-full px-4 py-1">
-                                        {{ tag }}
-                                    </span>
-                                </div>
-                            </div>
-                        </NuxtLink>
-
-                        <div class="flex flex-col md:flex-row gap-2 md:gap-3 p-6 pt-0">
-                            <button class="btn text-xl font-normal flex-1" @click="openTakeModal(dog)">
-                                ХОЧУ ЗАБРАТЬ
-                            </button>
-                            <button
-                                class="btn text-xl bg-transparent border-2 border-accent text-accent font-normal flex-1 hover:bg-accent hover:text-white transition-colors"
-                                @click="openCustodyModal(dog)">
-                                ВЗЯТЬ ПОД ОПЕКУ
-                            </button>
-                        </div>
-                    </div>
+                <div class="base-container mx-auto flex justify-center items-center w-full h-100 text-text-secondary text-center text-2xl"
+                    v-if="isDogListEmpty">
+                    Собачек пока нет в приюте.
+                </div>
+                <div class="base-container mx-auto flex justify-center items-center w-full h-100 text-alert text-center text-2xl"
+                    v-else-if="isErrorPresent">
+                    Произошла ошибка при загрузке собачек.<br>Приносим свои извинения! =(
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" v-else>
+                    <DogCard v-for="dog in dogs" :dog="dog" :key="dog.id" @open-custody-modal="openCustodyModal(dog)"
+                        @open-take-modal="openTakeModal(dog)" @click="openDogModal(dog)"></DogCard>
                 </div>
                 <CustodyModal :is-open="isCustodyModalOpen" :dog="selectedDog" @close="closeCustodyModal"
-                    @submit="handleCustodySubmit" />
-                <TakeModal :is-open="isTakeModalOpen" @close="closeTakeModal">
+                    @submit="handleCustodySubmit" :level="helperModalLevel" />
+                <TakeModal :is-open="isTakeModalOpen" @close="closeTakeModal" :level="helperModalLevel">
                 </TakeModal>
+                <DogModal :dog="dogToDisplay" :is-open="isDogModalOpen" @close="closeDogModal"
+                    @open-custody-modal="openCustodyModal(dogToDisplay)" @open-take-modal="openTakeModal(dogToDisplay)"
+                    :has-header="false">
+                </DogModal>
             </div>
         </main>
     </div>
 </template>
-
-<script setup lang="ts">
-interface Dog {
-    id: number
-    name: string
-    gender: string
-    age: string
-    hasPassport: boolean
-    tags: string[]
-    image?: string
-}
-
-const isCustodyModalOpen = ref(false)
-const isTakeModalOpen = ref(false)
-
-const selectedDog = ref<Dog | undefined>(undefined)
-
-function openTakeModal(dog: Dog) {
-    isTakeModalOpen.value = true
-    selectedDog.value = dog
-}
-
-function closeTakeModal() {
-    isTakeModalOpen.value = false
-    selectedDog.value = undefined
-}
-
-const openCustodyModal = (dog: Dog) => {
-    selectedDog.value = dog
-    isCustodyModalOpen.value = true
-}
-
-const closeCustodyModal = () => {
-    isCustodyModalOpen.value = false
-    selectedDog.value = undefined
-}
-
-function handleTakeSumbit() {
-    closeTakeModal()
-}
-
-const handleCustodySubmit = (formData: any) => {
-    console.log('Данные формы опеки:', formData)
-    alert('Заявка на опеку отправлена! Мы свяжемся с вами в ближайшее время.')
-    closeCustodyModal()
-}
-
-const dogs: Dog[] = [
-    {
-        id: 1,
-        name: 'Тоби',
-        gender: 'мужской',
-        age: '2 года',
-        hasPassport: true,
-        tags: ['Дружелюбен с детьми'],
-        image: '/images/pets/tobi.jpg'
-    },
-    {
-        id: 2,
-        name: 'Арчи',
-        gender: 'мужской',
-        age: '4 года',
-        hasPassport: true,
-        tags: ['Дружелюбен с детьми', 'Любит гулять'],
-        image: '/images/pets/archi.jpg'
-    },
-    {
-        id: 3,
-        name: 'Луна',
-        gender: 'женский',
-        age: '1 год',
-        hasPassport: true,
-        tags: ['Спокойная', 'Ладит с кошками']
-    }
-]
-</script>

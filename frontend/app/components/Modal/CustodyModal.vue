@@ -1,6 +1,7 @@
 <template>
-    <Modal :is-open="isOpen" @close="closeModal()" modal-class="py-3">
-        <div class="px-3">
+    <Modal :is-open="isOpen" @close="closeModal()" modal-class="py-3 w-full sm:max-w-md" :level="level"
+        title="Взять под опеку">
+        <div class=" sm:min-w-sm px-3">
             <form @submit.prevent="submitForm" class="space-y-2">
                 <div>
                     <label class="block text-text-secondary mb-1 text-sm pl-3">Фамилия Имя Отчество</label>
@@ -41,6 +42,7 @@ interface Dog {
 interface Props {
     isOpen: boolean
     dog?: Dog
+    level: number
 }
 
 interface Emits {
@@ -56,16 +58,7 @@ const formData = reactive({
     email: ''
 })
 
-const disableBodyScroll = () => {
-    document.body.style.overflow = 'hidden'
-}
-
-const enableBodyScroll = () => {
-    document.body.style.overflow = ''
-}
-
 const closeModal = () => {
-    enableBodyScroll()
     emit('close')
 }
 
@@ -81,13 +74,7 @@ const submitForm = () => {
 
     closeModal()
 }
-watch(() => props.isOpen, (newVal) => {
-    if (newVal) {
-        disableBodyScroll()
-    } else {
-        enableBodyScroll()
-    }
-})
+
 
 const handleEscape = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && props.isOpen) {
@@ -101,6 +88,5 @@ onMounted(() => {
 
 onUnmounted(() => {
     document.removeEventListener('keydown', handleEscape)
-    enableBodyScroll()
 })
 </script>
