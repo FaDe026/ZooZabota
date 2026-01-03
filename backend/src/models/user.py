@@ -2,6 +2,10 @@ from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime
 from src.database import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.models.news import NewsModel
 
 class UserModel(Base):
     __tablename__ = 'user'
@@ -12,9 +16,4 @@ class UserModel(Base):
     email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="Admin")
 
-    # Связи (relationships)
-    # В ERD User связан с News как Author_ID. Добавим связь.
     news: Mapped[list["NewsModel"]] = relationship("NewsModel", back_populates="author", cascade="all, delete-orphan")
-
-    # Если потребуется связь с другими сущностями (например, Request), добавьте их здесь.
-    # requests: Mapped[list["RequestModel"]] = relationship("RequestModel", back_populates="user")

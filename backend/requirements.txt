@@ -27,6 +27,8 @@ Pygments==2.19.2
 python-dotenv==1.2.1
 python-multipart==0.0.20
 PyYAML==6.0.3
+python-jose[cryptography]==3.4.0
+passlib[argon2]==1.7.4
 rich==14.2.0
 rich-toolkit==0.16.0
 rignore==0.7.6
