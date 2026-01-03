@@ -11,23 +11,10 @@ from src.utils.auth import get_current_user
 from src.utils.validate_image import validate_and_save_news_image
 from pathlib import Path
 from typing import Union
+from src.utils.validate_array import parse_tag_ids
 
 
 router = APIRouter(prefix="/news", tags=["News"])
-
-
-def parse_tag_ids(tag_ids_str: str | None) -> list[int]:
-    """Преобразует строку '1,2,3' в список [1, 2, 3]."""
-    if not tag_ids_str:
-        return []
-    try:
-        return [int(x.strip()) for x in tag_ids_str.split(",") if x.strip()]
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail="Неверный формат tag_ids. Ожидаются целые числа, разделённые запятыми (например: 1,2,3)."
-        )
-
 
 @router.post("/", response_model=NewsGetSchema)
 async def add_news(
@@ -40,9 +27,12 @@ async def add_news(
         description="Список ID тегов через запятую (например: 1,2,3)"
     ),
     preview: str | None = Form(None),
-    file: UploadFile = File(None),
+    file: Union[UploadFile, str] = File(None),
 ):
     """Создать новую новость с привязкой тегов по ID."""
+    if isinstance(file, str) and file.strip() == "":
+        file = None
+
     image_url = await validate_and_save_news_image(file)
 
     news_tags = []

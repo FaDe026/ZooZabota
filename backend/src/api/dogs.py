@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from src.api.dependencies import SessionDep
 from src.models.dogs import DogModel
 from src.schemas.dogs import DogAddSchema, DogResponseSchema, DogImagesRandomSchema
@@ -11,12 +11,15 @@ from pathlib import Path
 from src.models.tags import TagModel
 from sqlalchemy.orm import selectinload
 from src.utils.validate_array import parse_tag_ids
+from src.utils.auth import UserModel
+from src.utils.auth import get_current_user
 
 router = APIRouter(prefix="/dogs", tags=["Dogs"])
 
 @router.post("", response_model=DogResponseSchema)
 async def add_dog_with_avatar(
     session: SessionDep,
+    current_user: UserModel = Depends(get_current_user),
     name: str = Form(...),
     age: int = Form(...),
     breed: str = Form(...),
@@ -105,6 +108,7 @@ async def get_dog(dog_id: int, session: SessionDep):
 async def put_dog(
     dog_id: int,
     session: SessionDep,
+    current_user: UserModel = Depends(get_current_user),
     name: str = Form(...),
     age: int = Form(...),
     breed: str = Form(...),
@@ -162,6 +166,7 @@ async def put_dog(
 async def partial_update_dog(
         dog_id: int,
         session: SessionDep,
+        current_user: UserModel = Depends(get_current_user),
         name: Optional[str] = Form(None),
         age: Optional[int] = Form(None),
         breed: Optional[str] = Form(None),
@@ -228,7 +233,7 @@ async def partial_update_dog(
 
 
 @router.delete("/{dog_id}")
-async def delete_dog(dog_id: int, session: SessionDep):
+async def delete_dog(dog_id: int, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     query = select(DogModel).where(dog_id == DogModel.id)
     result = await session.execute(query)
     dog = result.scalar_one_or_none()
