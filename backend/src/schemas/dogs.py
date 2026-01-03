@@ -2,7 +2,8 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict
 from datetime import date
 from src.enums import GenderEnum
-
+from typing import List
+from src.schemas.tags import TagResponseSchema
 
 class DogAddSchema(BaseModel):
     name: str
@@ -23,6 +24,7 @@ class DogResponseSchema(BaseModel):
     veterinary_passport: bool
     gender: GenderEnum
     image_url: str | None = None
+    tags: List[TagResponseSchema]
 
     class Config:
         from_attributes = True

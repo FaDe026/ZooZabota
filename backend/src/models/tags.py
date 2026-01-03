@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from src.models.news import NewsModel
+    from src.models.dogs import DogModel
 
 class TagModel(Base):
     __tablename__ = 'tag'
@@ -17,5 +18,12 @@ class TagModel(Base):
         "NewsModel",
         secondary=tag_news,
         back_populates="tags",
-        lazy="selectin",
+        lazy="selectin"
+    )
+
+    dogs: Mapped[List["DogModel"]] = relationship(
+        "DogModel",
+        secondary=tag_dog,
+        back_populates="tags",
+        passive_deletes=True
     )
