@@ -261,7 +261,6 @@ async function saveChanges() {
                             </div>
 
                             <div class="p-6">
-                                <!-- Имя собаки -->
                                 <div v-if="isInEditMode" class="mb-4">
                                     <TextInput v-model="editName" placeholder="Имя собаки" />
                                     <span v-if="nameError" class="text-error text-sm">Имя не может быть пустым</span>
@@ -269,7 +268,6 @@ async function saveChanges() {
                                 <h3 v-else class="section-title flex justify-center items-center mb-4">{{ dog.name }}
                                 </h3>
 
-                                <!-- Описание -->
                                 <div class="mb-6">
                                     <div v-if="isInEditMode">
                                         <div
@@ -285,9 +283,7 @@ async function saveChanges() {
                                     </p>
                                 </div>
 
-                                <!-- Информация о собаке -->
                                 <div v-if="isInEditMode" class="flex flex-col gap-4 mb-6">
-                                    <!-- Пол -->
                                     <div>
                                         <span class="text-text-secondary block mb-2">Пол:</span>
                                         <div class="flex gap-4">
@@ -300,7 +296,6 @@ async function saveChanges() {
                                         </div>
                                     </div>
 
-                                    <!-- Возраст -->
                                     <div>
                                         <span class="text-text-secondary block mb-2">Возраст (лет):</span>
                                         <div
@@ -312,7 +307,6 @@ async function saveChanges() {
                                             0</span>
                                     </div>
 
-                                    <!-- Ветпаспорт -->
                                     <div>
                                         <LabeledCheckbox postion="after" name="vetPassport" v-model="editVetPassport">
                                             Ветпаспорт:
@@ -361,14 +355,16 @@ async function saveChanges() {
                         <p class="text-2xl text-text-secondary">Собака не найдена</p>
                     </div>
 
-                    <div v-if="!isInEditMode" class="flex flex-col sm:flex-row gap-2">
-                        <button class="btn w-full" @click="toggleEditMode">Редактировать карточку</button>
-                        <button class="secondary-btn w-full" @click="openDeleteModal()">Удалить карточку</button>
-                    </div>
-                    <div v-else class="flex flex-col sm:flex-row gap-2">
-                        <button class="btn w-full" @click="saveChanges">Сохранить изменения</button>
-                        <button class="secondary-btn w-full" @click="toggleEditMode">Отменить</button>
-                    </div>
+                    <template v-if="dog">
+                        <div v-if="!isInEditMode" class="flex flex-col sm:flex-row gap-2">
+                            <button class="btn w-full" @click="toggleEditMode">Редактировать карточку</button>
+                            <button class="secondary-btn w-full" @click="openDeleteModal()">Удалить карточку</button>
+                        </div>
+                        <div v-else class="flex flex-col sm:flex-row gap-2">
+                            <button class="btn w-full" @click="saveChanges">Сохранить изменения</button>
+                            <button class="secondary-btn w-full" @click="toggleEditMode">Отменить</button>
+                        </div>
+                    </template>
 
                     <Modal title="Удаление карточки" :is-open="isDeleteModalOpen" @close="closeDeleteModal()">
                         <template #beforeHeader>

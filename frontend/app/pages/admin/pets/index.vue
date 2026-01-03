@@ -47,8 +47,8 @@ function backClicked() {
             <h1 class="text-2xl text-primary text-center font-bold">Животные</h1>
         </div>
 
-        <div class="base-container mx-auto">
-            <button class="btn w-full">Добавить животное</button>
+        <div class="base-container flex mx-auto">
+            <NuxtLink to="/admin/pets/add" class="btn w-full">Добавить животное</NuxtLink>
         </div>
 
         <div class="flex flex-col gap-2 base-container mx-auto">
