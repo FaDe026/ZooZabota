@@ -1,7 +1,19 @@
 <script lang="ts" setup>
 const router = useRouter()
 const route = useRoute()
-const { data, error, pending } = useServerFetch<News>(`/news/${route.params.id}`)
+const config = useRuntimeConfig()
+
+const { data: news, error, pending } = useServerFetch<News>(`/news/${route.params.id}`)
+
+const imageUrl = computed(() => {
+    if (!news.value) return ""
+    return `${config.public.apiBase}${news.value.image_url}`
+})
+
+const hasImage = computed(() => {
+    if (!news.value) return false
+    return (news.value.image_url) ? true : false
+})
 
 function backClicked() {
     router.back()
@@ -19,13 +31,16 @@ function backClicked() {
                     stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            <h1 class="text-2xl text-primary text-center font-bold">{{ data?.title }}</h1>
+            <h1 class="text-2xl text-primary text-center font-bold">{{ news?.title }}</h1>
         </div>
-        <div class="base-container flex flex-col mx-auto">
-            <img class="w-full aspect-video object-cover rounded-xl shadow-xl/10 self-center" src="/images/news/1.png"
-                alt="">
-            <div class="text-text-primary text-lg">
-                {{ data?.body }}
+        <div class="base-container flex flex-col gap-3 mx-auto">
+            <div
+                class="flex bg-gray-200 items-center justify-center w-full aspect-video object-cover rounded-xl shadow-xl/10 self-center overflow-hidden">
+                <img v-if="hasImage" class="object-cover w-full h-full" :src="imageUrl" alt="">
+                <Icon v-else name="material-symbols:newspaper" class="text-6xl text-text-secondary" />
+            </div>
+            <div class="text-text-primary text-xl">
+                {{ news?.body }}
             </div>
         </div>
     </section>

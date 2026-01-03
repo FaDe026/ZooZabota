@@ -8,6 +8,7 @@ declare global {
         author_id: number,
         tags: string,
         preview: string,
+        image_url: string | null,
     }
 
     interface Dog {
@@ -20,8 +21,16 @@ declare global {
         veterinary_passport: boolean
         gender: DogGender
 
-        tags: string[]
-        image?: string
+        tags: {
+            id: number,
+            name: string
+        }[]
+        image_url: string | null
+    }
+
+    interface DogSlideInfo {
+        id: number
+        image_url: string
     }
 }
 

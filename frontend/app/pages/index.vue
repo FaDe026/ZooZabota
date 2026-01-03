@@ -2,16 +2,22 @@
 // const { data, error, pending } = await useNewsList()
 const config = useRuntimeConfig()
 
-const { data: newsList, error, pending: pendingNews } = await useFetch<News[]>("/news", {
+const { data, error, pending: pendingNews } = await useFetch<News[]>("/news", {
     baseURL: config.public.apiBase
 })
+const newsList = computed(() => {
+    if (!data.value) return []
+
+    return data.value.toReversed().slice(0, 3)
+})
+
 
 const newsLoaded = computed(() => {
     if (pendingNews.value) {
         return false
     }
 
-    if (newsList.value && newsList.value.length > 0) {
+    if (data.value && data.value.length > 0) {
         return true
     }
 
@@ -32,7 +38,7 @@ const newsLoaded = computed(() => {
                 социализируем и ищем любящие руки для наших подопечных. Но наша миссия невыполнима без вашей поддержки.
             </p>
             <h2 class="text-3xl text-primary">Ваша помощь превращает историю потери в историю спасения!</h2>
-            <button class="btn uppercase">Помочь приюту</button>
+            <NuxtLink to="/help" class="btn uppercase">Помочь приюту</NuxtLink>
         </div>
     </section>
 
@@ -56,10 +62,10 @@ const newsLoaded = computed(() => {
     <section class="base-section">
         <div class="mx-auto flex flex-col items-center base-container gap-10">
             <h2 class="section-title">Наши питомцы</h2>
-            <div class="w-full flex justify-center items-center">
+            <div class="w-full max-w-4xl flex justify-center items-center">
                 <DogSlider></DogSlider>
             </div>
-            <button class="btn">Выбрать питомца</button>
+            <NuxtLink to="/ourPets" class="btn">Выбрать питомца</NuxtLink>
         </div>
     </section>
 
@@ -89,10 +95,10 @@ const newsLoaded = computed(() => {
     <section class="base-section">
         <div class="mx-auto flex flex-col items-center max-w-7xl w-full gap-10">
             <h2 class="section-title">Последние новости</h2>
-            <div v-if="!newsLoaded">Пока нет новостей</div>
+            <h3 v-if="!newsLoaded" class="text-2xl">Пока нет новостей</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full gap-5" v-else>
-                <NewsCard v-for="news in newsList?.slice(0, 3)" img-src="/images/news/1.png" :title="news.title"
-                    :key="news.id" :news-id="`${news.id}`" :date="news.date">
+                <NewsCard v-for="news in newsList" :img-src="news.image_url" :title="news.title" :key="news.id"
+                    :news-id="`${news.id}`" :date="news.date">
                 </NewsCard>
             </div>
         </div>

@@ -4,6 +4,8 @@ import { baseModalProps } from '~/shared/props/modalProps';
 import { DogGender } from '~/types/dogGender';
 
 
+const config = useRuntimeConfig()
+
 const { dog, isOpen } = defineProps({
     ...baseModalProps,
     dog: {
@@ -22,9 +24,16 @@ const gender = computed(() => {
     return (dog.gender === DogGender.male) ? "Мужской" : "Женский"
 })
 const veterinaryPassport = computed(() => {
-    return (dog.vetirinary_passport) ? "есть" : "нет"
+    return (dog.veterinary_passport) ? "есть" : "нет"
 })
 
+const imageUrl = computed(() => {
+    return `${config.public.apiBase}${dog.image_url}`
+})
+
+const hasImage = computed(() => {
+    return (dog.image_url) ? true : false
+})
 
 function close() {
     emit('close')
@@ -44,7 +53,7 @@ watch(() => dog, (newVal) => {
 
 </script>
 <template>
-    <Modal :is-open="isOpen" @close="close()" modal-class="w-full sm:max-w-md" :has-header="false">
+    <Modal :is-open="isOpen" @close="close()" modal-class="w-full sm:max-w-xl" :has-header="false">
         <div class="flex flex-col relative card-bg rounded-2xl overflow-hidden w-full">
             <div class="absolute right-2 top-2 cursor-pointer" @click="close()">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,7 +77,7 @@ watch(() => dog, (newVal) => {
             </div>
             <div
                 class="w-full aspect-video bg-gray-200 flex items-center justify-center overflow-hidden rounded-bl-xl rounded-br-xl">
-                <img v-if="dog.image" :src="dog.image" :alt="dog.name" class="w-full h-full object-cover">
+                <img v-if="hasImage" :src="imageUrl" :alt="dog.name" class="w-full h-full object-cover">
                 <Icon v-else name="material-symbols:pets" class="text-6xl text-text-secondary" />
             </div>
 
@@ -92,9 +101,9 @@ watch(() => dog, (newVal) => {
                 </div>
 
                 <div class="flex flex-wrap gap-2 mb-6">
-                    <span v-for="tag in dog.tags" :key="tag"
+                    <span v-for="tag in dog.tags" :key="tag.id"
                         class="bg-transparent border-2 border-accent text-accent text-xl font-normal rounded-full px-4 py-1">
-                        {{ tag }}
+                        {{ tag.name }}
                     </span>
                 </div>
 
