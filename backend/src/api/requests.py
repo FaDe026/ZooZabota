@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from src.api.dependencies import SessionDep
@@ -6,12 +6,14 @@ from src.models.requests import RequestModel, AdoptionRequestModel, GuardianRequ
 from src.schemas.requests import RequestCreateSchema, RequestResponseSchema, RequestPatchSchema
 from src.enums import RequestTypeEnum
 from src.enums import RequestStatusEnum
+from src.utils.auth import UserModel
+from src.utils.auth import get_current_user
 
 router = APIRouter(prefix="/requests", tags=["Requests"])
 
 
 @router.post("", response_model=RequestResponseSchema)
-async def create_request(request_data: RequestCreateSchema, session: SessionDep):
+async def create_request(request_data: RequestCreateSchema, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     request = RequestModel(
         dog_id=request_data.dog_id,
         full_name=request_data.full_name,
@@ -69,7 +71,7 @@ async def get_request(request_id: int, session: SessionDep):
     return request
 
 @router.put("/{request_id}", response_model=RequestResponseSchema)
-async def update_request(request_id: int, request_data: RequestCreateSchema, session: SessionDep):
+async def update_request(request_id: int, request_data: RequestCreateSchema, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     query = (
         select(RequestModel)
         .options(
@@ -124,7 +126,7 @@ async def update_request(request_id: int, request_data: RequestCreateSchema, ses
 
 
 @router.patch("/{request_id}", response_model=RequestResponseSchema)
-async def partial_update_request(request_id: int, update_data: RequestPatchSchema,session: SessionDep):
+async def partial_update_request(request_id: int, update_data: RequestPatchSchema,session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     query = (
         select(RequestModel)
         .options(
@@ -177,7 +179,7 @@ async def partial_update_request(request_id: int, update_data: RequestPatchSchem
 
 
 @router.delete("/{request_id}")
-async def delete_request(request_id: int, session: SessionDep):
+async def delete_request(request_id: int, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     request = await session.get(RequestModel, request_id)
     if request is None:
         raise HTTPException(404, "Заявка не найдена")

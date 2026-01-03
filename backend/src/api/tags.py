@@ -1,15 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from src.api.dependencies import SessionDep
 from src.models.tags import TagModel
 from src.schemas.tags import TagAddSchema, TagResponseSchema
 from sqlalchemy import select
+from src.utils.auth import UserModel
+from src.utils.auth import get_current_user
 
 
 router = APIRouter(prefix="/tags", tags=["Tags"])
 
 
 @router.post("", response_model=TagResponseSchema)
-async def add_tag(data: TagAddSchema, session: SessionDep):
+async def add_tag(data: TagAddSchema, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     new_tag = TagModel(name=data.name)
     session.add(new_tag)
     await session.commit()
@@ -37,7 +39,7 @@ async def get_tag(tag_id: int, session: SessionDep):
 
 
 @router.put("/{tag_id}", response_model=TagResponseSchema)
-async def put_tag(tag_id: int, data: TagAddSchema, session: SessionDep):
+async def put_tag(tag_id: int, data: TagAddSchema, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     query = select(TagModel).where(tag_id == TagModel.id)
     result = await session.execute(query)
     tag = result.scalar_one_or_none()
@@ -54,7 +56,7 @@ async def put_tag(tag_id: int, data: TagAddSchema, session: SessionDep):
 
 
 @router.patch("/{tag_id}", response_model=TagResponseSchema)
-async def partial_update_tag(tag_id: int, data: TagAddSchema, session: SessionDep):
+async def partial_update_tag(tag_id: int, data: TagAddSchema, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     query = select(TagModel).where(tag_id == TagModel.id)
     result = await session.execute(query)
     tag = result.scalar_one_or_none()
@@ -73,7 +75,7 @@ async def partial_update_tag(tag_id: int, data: TagAddSchema, session: SessionDe
 
 
 @router.delete("/{tag_id}", response_model=TagResponseSchema)
-async def delete_tag(tag_id: int, session: SessionDep):
+async def delete_tag(tag_id: int, session: SessionDep, current_user: UserModel = Depends(get_current_user)):
     query = select(TagModel).where(tag_id == TagModel.id)
     result = await session.execute(query)
     tag = result.scalar_one_or_none()
