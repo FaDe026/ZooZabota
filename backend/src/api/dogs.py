@@ -164,6 +164,7 @@ async def put_dog(
 
 
 @router.patch("/{dog_id}", response_model=DogResponseSchema)
+# pylint
 async def partial_update_dog(
         dog_id: int,
         session: SessionDep,

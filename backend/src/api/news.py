@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Union
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -5,12 +8,9 @@ from src.database import get_session
 from src.models.news import NewsModel
 from src.models.tags import TagModel
 from src.schemas.news import NewsGetSchema
-from datetime import datetime
 from src.models.user import UserModel
 from src.utils.auth import get_current_user
 from src.utils.validate_image import validate_and_save_news_image
-from pathlib import Path
-from typing import Union
 from src.utils.validate_array import parse_tag_ids
 
 
@@ -152,7 +152,9 @@ async def partial_update_news(
     date_str: str | None = Form(None),
     tag_ids: str | None = Form(
         None,
-        description="Список ID тегов через запятую (например: 1,2,3). Передайте пустую строку, чтобы удалить все теги."
+        description="Список ID тегов через запятую "
+                    "(например: 1,2,3). "
+                    "Передайте пустую строку, чтобы удалить все теги."
     ),
     preview: str | None = Form(None),
     file: Union[UploadFile, str] = File(None),
@@ -211,7 +213,9 @@ async def partial_update_news(
 
 
 @router.delete("/{news_id}")
-async def delete_news(news_id: int, session: AsyncSession = Depends(get_session), current_user: UserModel = Depends(get_current_user)):
+async def delete_news(news_id: int,
+                      session: AsyncSession = Depends(get_session),
+                      current_user: UserModel = Depends(get_current_user)):
     """Удалить новость и связанные данные."""
     result = await session.execute(select(NewsModel).where(NewsModel.id == news_id))
     news = result.scalar_one_or_none()
@@ -223,7 +227,7 @@ async def delete_news(news_id: int, session: AsyncSession = Depends(get_session)
         if file_path.exists():
             try:
                 file_path.unlink()
-            except Exception as e:
+            except FileNotFoundError as e:
                 print(f"Ошибка при удалении файла {file_path}: {e}")
 
     await session.delete(news)

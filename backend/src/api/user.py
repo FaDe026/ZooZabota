@@ -98,7 +98,9 @@ async def update_user(
 
 
 @router.delete("/{user_id}")
-async def delete_user(user_id: int, session: AsyncSession = Depends(get_session), current_user: UserModel = Depends(get_current_user)):
+async def delete_user(user_id: int,
+                      session: AsyncSession = Depends(get_session),
+                      current_user: UserModel = Depends(get_current_user)):
     query = select(UserModel).where(UserModel.id == user_id)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
