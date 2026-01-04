@@ -17,6 +17,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    volumes:
+      - app_static_data:/app/static
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -30,3 +32,4 @@ services:
 
 volumes:
   postgres_data:
+  app_static_data:
