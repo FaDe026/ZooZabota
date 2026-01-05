@@ -25,3 +25,9 @@ jobs:
       run: |
         cd backend
         pylint src/
+    - name: Set up Docker
+      uses: docker/setup-docker-action@v4
+    - name: Set up Docker Compose
+      uses: docker/setup-compose-action@v1
+    - name: Build images
+      run: docker compose build
