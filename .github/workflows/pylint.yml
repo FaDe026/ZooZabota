@@ -1,6 +1,11 @@
 name: Pylint
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+      - backend-1
+      - backend-authorization-dogs-requests-tags
 
 jobs:
   build:
