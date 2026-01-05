@@ -2,6 +2,7 @@
 definePageMeta({ layout: 'default' })
 
 import { ref, computed, watch } from 'vue'
+import { apiFetch } from '~/composables/useAPI.ts'
 
 const route = useRoute()
 const router = useRouter()
@@ -40,16 +41,12 @@ const errorMessage = ref<string | null>(null)
 const { pending } = await useAsyncData(
   `request-${applicationId}`,
   async () => {
-    const response = await $fetch<RequestApiResponse>(
-      `http://localhost:8000/requests/${applicationId}`
-    )
+    const response = await apiFetch<RequestApiResponse>(`/requests/${applicationId}`)
 
     let petName = 'Питомец не указан'
     if (response.dog_id) {
       try {
-        const dog = await $fetch<{ name: string }>(
-          `http://localhost:8000/dogs/${response.dog_id}`
-        )
+        const dog = await apiFetch<{ name: string }>(`/dogs/${response.dog_id}`)
         petName = dog.name
       } catch {
         petName = `Собака #${response.dog_id}`
@@ -105,20 +102,15 @@ const saveStatus = async () => {
       rejected: 'Отклонено'
     }
     
-    await $fetch(
-      `http://localhost:8000/requests/${applicationId}`,
-      {
-        method: 'PUT',
-        body: {
-          dog_id: application.value.petId,
-          full_name: application.value.clientName,
-          phone: application.value.phone,
-          email: application.value.email || null,
-          status: statusMapping[localStatus.value as keyof typeof statusMapping],
-          type: application.value.type === 'adoption' ? 'Усыновление' : 'Опекунство'
-        }
-      }
-    )
+    await apiFetch(`/requests/${applicationId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      status: statusMapping[localStatus.value as keyof typeof statusMapping]
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
     
     if (application.value) {
       application.value.status = localStatus.value
@@ -130,14 +122,6 @@ const saveStatus = async () => {
   } catch (error: any) {
     console.error('Ошибка при сохранении статуса:', error)
     errorMessage.value = 'Не удалось обновить статус заявки'
-    try {
-      await $fetch(
-        `http://localhost:8000/requests/${applicationId}/status?status=${localStatus.value}`,
-        { method: 'POST' }
-      )
-    } catch (secondError) {
-      errorMessage.value = 'Ошибка сервера. Проверьте консоль для деталей.'
-    }
   } finally {
     isLoading.value = false
   }
