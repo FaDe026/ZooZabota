@@ -18,4 +18,5 @@ jobs:
         pip install -r requirements.txt
     - name: Run Pylint
       run: |
+        cd backend
         pylint src/
