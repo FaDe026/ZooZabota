@@ -2,91 +2,95 @@
 definePageMeta({
     layout: "admin"
 })
-import { FetchError } from 'ofetch';
-import { DogGender } from '~/types/dogGender'
 
+import { FetchError } from "ofetch"
+import { DogGender } from "~/types/dogGender"
 
 const router = useRouter()
 const route = useRoute()
 const config = useRuntimeConfig()
-const { data: dog, error, pending } = useServerFetch<Dog>(`/dogs/${route.params.id}`)
+
+const { data: dog } = useServerFetch<Dog>(`/dogs/${route.params.id}`)
+
+/* ================= DELETE ================= */
 
 const isDeleteModalOpen = ref(false)
-const deleteMessage = ref<string | null>(null);
+const deleteMessage = ref<string | null>(null)
 const deleteStatus = ref<"none" | "success" | "error">("none")
 
-const isInEditMode = ref(false)
-
-// Редактируемые данные
-const editName = ref("")
-const editDescription = ref("")
-const editTags = ref<string[]>([])
-const newTag = ref("")
-const editAge = ref<number>(0)
-const editGender = ref<DogGender>(DogGender.male)
-const editVetPassport = ref(false)
-const selectedImage = ref<File | null>(null)
-const previewImage = ref<string | null>(null)
-
-// Валидация
-const nameError = ref(false)
-const descriptionError = ref(false)
-const ageError = ref(false)
-const tagErrors = ref<boolean[]>([])
-
-const gender = computed(() => {
-    if (!dog.value) return ""
-    return (dog.value.gender === DogGender.male) ? "Мужской" : "Женский"
-})
-
-const veterinaryPassport = computed(() => {
-    if (!dog.value) return ""
-    return (dog.value.veterinary_passport) ? "есть" : "нет"
-})
-
-const age = computed(() => {
-    return ageText(dog.value)
-})
-
-const displayDeleteMessage = computed(() => {
-    return deleteStatus.value !== "none"
-})
-
-const deleteMessageClasses = computed(() => {
-    return {
-        "text-success": (deleteStatus.value === "success"),
-        "text-error": (deleteStatus.value === "error"),
-    }
-})
-
-const displayImage = computed(() => {
-    if (previewImage.value) return previewImage.value
-    return dog.value?.image
-})
+function openDeleteModal() {
+    isDeleteModalOpen.value = true
+}
 
 function closeDeleteModal() {
     isDeleteModalOpen.value = false
     deleteStatus.value = "none"
 }
 
-function openDeleteModal() {
-    isDeleteModalOpen.value = true
-}
-
 async function deleteDog() {
     if (!dog.value) return
     try {
-        await $fetch(`${config.public.apiBase}/dogs/${dog.value.id}`, { method: "DELETE" })
+        await $fetch(`${config.public.apiBase}/dogs/${dog.value.id}`, {
+            method: "DELETE"
+        })
         deleteMessage.value = "Животное удалено успешно!"
         deleteStatus.value = "success"
         setTimeout(() => router.back(), 500)
-    }
-    catch (err) {
-        deleteMessage.value = "Не удалось удалить животное, произошла ошибка. Приносим свои извинения."
-        console.log(err)
+    } catch (e) {
+        deleteMessage.value = "Ошибка удаления"
         deleteStatus.value = "error"
     }
 }
+
+/* ================= EDIT ================= */
+
+const isInEditMode = ref(false)
+
+const editName = ref("")
+const editDescription = ref("")
+const editAge = ref<number>(0)
+const editGender = ref<DogGender>(DogGender.male)
+const editVetPassport = ref(false)
+const editTags = ref<string[]>([])
+const selectedImage = ref<File | null>(null)
+const previewImage = ref<string | null>(null)
+
+// обязательное поле backend
+const editBreed = ref("Неизвестно")
+
+/* =============== VALIDATION =============== */
+
+const nameError = ref(false)
+const descriptionError = ref(false)
+const ageError = ref(false)
+const tagErrors = ref<boolean[]>([])
+
+/* =============== COMPUTED ================= */
+
+const gender = computed(() =>
+    dog.value?.gender === DogGender.male ? "Мужской" : "Женский"
+)
+
+const veterinaryPassport = computed(() =>
+    dog.value?.veterinary_passport ? "есть" : "нет"
+)
+
+const age = computed(() => ageText(dog.value))
+
+const displayImage = computed(() =>
+    previewImage.value || dog.value?.image
+)
+
+const displayDeleteMessage = computed(() =>
+    deleteStatus.value !== "none"
+)
+
+const deleteMessageClasses = computed(() => ({
+    "text-success": deleteStatus.value === "success",
+    "text-error": deleteStatus.value === "error"
+}))
+
+/* ================= UI ================= */
 
 function backClicked() {
     router.back()
@@ -96,32 +100,36 @@ function toggleEditMode() {
     if (!dog.value) return
 
     if (!isInEditMode.value) {
-        // Входим в режим редактирования
         editName.value = dog.value.name
         editDescription.value = dog.value.description
-        // editTags.value = [...dog.value.tags]
-        editTags.value = []
         editAge.value = dog.value.age
         editGender.value = dog.value.gender
         editVetPassport.value = dog.value.veterinary_passport
-        nameError.value = false
-        descriptionError.value = false
-        ageError.value = false
-        tagErrors.value = []
+        editTags.value = []
         previewImage.value = null
         selectedImage.value = null
     }
-    console.log(dog.value)
     isInEditMode.value = !isInEditMode.value
 }
 
+function triggerImageUpload() {
+    document.getElementById("imageInput")?.click()
+}
+
+function handleImageChange(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
+
+    selectedImage.value = file
+    const reader = new FileReader()
+    reader.onload = e => (previewImage.value = e.target?.result as string)
+    reader.readAsDataURL(file)
+}
+
 function addTag() {
-    const trimmedTag = newTag.value.trim()
-    if (trimmedTag && !editTags.value.includes(trimmedTag)) {
-        editTags.value.push(trimmedTag)
-        tagErrors.value.push(false)
-        newTag.value = ""
-    }
+    editTags.value.push("")
+    tagErrors.value.push(false)
 }
 
 function removeTag(index: number) {
@@ -129,103 +137,42 @@ function removeTag(index: number) {
     tagErrors.value.splice(index, 1)
 }
 
-function updateTagValue(index: number, value: string) {
-    editTags.value[index] = value
-    // Проверка на пустоту при обновлении
-    tagErrors.value[index] = !value.trim()
-}
-
-function handleImageChange(event: Event) {
-    const target = event.target as HTMLInputElement
-    const file = target.files?.[0]
-
-    if (file) {
-        selectedImage.value = file
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            previewImage.value = e.target?.result as string
-        }
-        reader.readAsDataURL(file)
-    }
-}
-
-function triggerImageUpload() {
-    const input = document.getElementById('imageInput') as HTMLInputElement
-    input?.click()
-}
+/* ================= SAVE ================= */
 
 async function saveChanges() {
-    // Валидация
+    if (!dog.value) return
+
     nameError.value = !editName.value.trim()
     descriptionError.value = !editDescription.value.trim()
-    ageError.value = editAge.value <= 0 || isNaN(editAge.value)
+    ageError.value = editAge.value <= 0
 
-    // Проверка тегов на пустоту
-    tagErrors.value = editTags.value.map(tag => !tag.trim())
-    const hasEmptyTags = tagErrors.value.some(error => error)
+    if (nameError.value || descriptionError.value || ageError.value) return
 
-    if (nameError.value || descriptionError.value || ageError.value || hasEmptyTags) {
-        return
+    const formData = new FormData()
+    formData.append("name", editName.value.trim())
+    formData.append("age", editAge.value.toString())
+    formData.append("breed", editBreed.value)
+    formData.append("description", editDescription.value.trim())
+    formData.append("gender", editGender.value)
+    formData.append("veterinary_passport", String(editVetPassport.value))
+    formData.append("tag_ids", JSON.stringify([]))
+
+    if (selectedImage.value) {
+        formData.append("file", selectedImage.value)
     }
 
     try {
-        const formData = new FormData()
-        formData.append('name', editName.value.trim())
-        formData.append('description', editDescription.value.trim())
-        formData.append('age', editAge.value.toString())
-        formData.append('gender', editGender.value)
-        formData.append('vetirinary_passport', editVetPassport.value.toString())
-        formData.append('tags', JSON.stringify(editTags.value.map(tag => tag.trim())))
-
-        if (selectedImage.value) {
-            formData.append('image', selectedImage.value)
-        }
-
-        // await $fetch(`${config.public.apiBase}/dogs/${dog.value?.id}`, {
-        //     method: "PATCH",
-        //     body: formData
-        // })
-
-        console.log('Сохранение:', {
-            name: editName.value.trim(),
-            description: editDescription.value.trim(),
-            age: editAge.value,
-            gender: editGender.value,
-            vetirinary_passport: editVetPassport.value,
-            tags: editTags.value.map(tag => tag.trim()),
-            image: selectedImage.value
-        })
-
-        if (dog.value) {
-            // dog.value.name = editName.value.trim()
-            // dog.value.description = editDescription.value.trim()
-            // dog.value.age = editAge.value
-            // dog.value.gender = editGender.value
-            // dog.value.veterinary_passport = editVetPassport.value
-            // console.log(gender.value)
-            // dog.value.tags = editTags.value.map(tag => tag.trim())
-            // if (previewImage.value) {
-            //     dog.value.image = previewImage.value
-            // }
-            dog.value = {
-                ...dog.value,
-                name: editName.value.trim(),
-                description: editDescription.value.trim(),
-                age: editAge.value,
-                gender: editGender.value,
-                veterinary_passport: editVetPassport.value,
-                tags: editTags.value.map(tag => tag.trim()),
-                image: previewImage.value ?? dog.value.image
-            }
-        }
-
+        const updated = await $fetch<Dog>(
+            `${config.public.apiBase}/dogs/${dog.value.id}`,
+            { method: "PATCH", body: formData }
+        )
+        dog.value = updated
         isInEditMode.value = false
-    } catch (err) {
-        console.error('Ошибка сохранения:', err)
+    } catch (e) {
+        console.error("Ошибка сохранения", e)
     }
 }
 </script>
-
 <template>
     <section class="flex flex-col gap-4 base-section">
         <div class="base-container mx-auto relative flex justify-center items-center mb-2">

@@ -2,12 +2,12 @@
 definePageMeta({
     layout: "admin"
 })
+
 import { DogGender } from '~/types/dogGender'
 
 const router = useRouter()
 const config = useRuntimeConfig()
 
-// Данные формы
 const editName = ref("")
 const editDescription = ref("")
 const editTags = ref<string[]>([])
@@ -18,7 +18,9 @@ const editVetPassport = ref(false)
 const selectedImage = ref<File | null>(null)
 const previewImage = ref<string | null>(null)
 
-// Валидация
+// ОБЯЗАТЕЛЬНО для бэкенда
+const editBreed = ref("Неизвестно")
+
 const nameError = ref(false)
 const descriptionError = ref(false)
 const ageError = ref(false)
@@ -29,9 +31,9 @@ function backClicked() {
 }
 
 function addTag() {
-    const trimmedTag = newTag.value.trim()
-    if (trimmedTag && !editTags.value.includes(trimmedTag)) {
-        editTags.value.push(trimmedTag)
+    const trimmed = newTag.value.trim()
+    if (trimmed && !editTags.value.includes(trimmed)) {
+        editTags.value.push(trimmed)
         tagErrors.value.push(false)
         newTag.value = ""
     }
@@ -43,67 +45,51 @@ function removeTag(index: number) {
 }
 
 function handleImageChange(event: Event) {
-    const target = event.target as HTMLInputElement
-    const file = target.files?.[0]
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
 
-    if (file) {
-        selectedImage.value = file
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            previewImage.value = e.target?.result as string
-        }
-        reader.readAsDataURL(file)
-    }
+    selectedImage.value = file
+    const reader = new FileReader()
+    reader.onload = e => previewImage.value = e.target?.result as string
+    reader.readAsDataURL(file)
 }
 
 function triggerImageUpload() {
-    const input = document.getElementById('imageInput') as HTMLInputElement
-    input?.click()
+    document.getElementById("imageInput")?.click()
 }
 
 async function saveChanges() {
     nameError.value = !editName.value.trim()
     descriptionError.value = !editDescription.value.trim()
-    ageError.value = editAge.value <= 0 || isNaN(editAge.value)
+    ageError.value = editAge.value <= 0
 
-    tagErrors.value = editTags.value.map(tag => !tag.trim())
-    const hasEmptyTags = tagErrors.value.some(error => error)
-
-    if (nameError.value || descriptionError.value || ageError.value || hasEmptyTags) {
+    tagErrors.value = editTags.value.map(t => !t.trim())
+    if (nameError.value || descriptionError.value || ageError.value || tagErrors.value.some(Boolean)) {
         return
     }
 
+    const formData = new FormData()
+    formData.append("name", editName.value.trim())
+    formData.append("age", editAge.value.toString())
+    formData.append("breed", editBreed.value)
+    formData.append("description", editDescription.value.trim())
+    formData.append("gender", editGender.value)
+    formData.append("veterinary_passport", String(editVetPassport.value))
+    formData.append("tag_ids", JSON.stringify([]))
+
+    if (selectedImage.value) {
+        formData.append("file", selectedImage.value)
+    }
+
     try {
-        const formData = new FormData()
-        formData.append('name', editName.value.trim())
-        formData.append('description', editDescription.value.trim())
-        formData.append('age', editAge.value.toString())
-        formData.append('gender', editGender.value)
-        formData.append('vetirinary_passport', editVetPassport.value.toString())
-        formData.append('tags', JSON.stringify(editTags.value.map(tag => tag.trim())))
-
-        if (selectedImage.value) {
-            formData.append('image', selectedImage.value)
-        }
-
-        // await $fetch(`${config.public.apiBase}/dogs`, {
-        //     method: "POST",
-        //     body: formData
-        // })
-
-        console.log('Питомец добавлен:', {
-            name: editName.value.trim(),
-            description: editDescription.value.trim(),
-            age: editAge.value,
-            gender: editGender.value,
-            vetirinary_passport: editVetPassport.value,
-            tags: editTags.value.map(tag => tag.trim()),
-            image: selectedImage.value
+        await $fetch(`${config.public.apiBase}/dogs`, {
+            method: "POST",
+            body: formData
         })
-
         router.back()
-    } catch (err) {
-        console.error('Ошибка добавления:', err)
+    } catch (e) {
+        console.error("Ошибка добавления собаки:", e)
     }
 }
 
@@ -111,7 +97,6 @@ function cancelAdd() {
     router.back()
 }
 </script>
-
 <template>
     <section class="flex flex-col gap-4 base-section">
         <div class="base-container mx-auto relative flex justify-center items-center mb-2">
