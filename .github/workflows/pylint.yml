@@ -6,6 +6,7 @@ on:
       - main
       - backend-1
       - backend-authorization-dogs-requests-tags
+  workflow_dispatch:
 
 jobs:
   build:
