@@ -1,95 +1,12 @@
-<template>
-  <div class="min-h-screen bg-bg font-cuprum">
-    <main class="base-section pt-10">
-      <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-          <h1 class="text-3xl text-center mb-8">
-            {{ pageTitle }}
-          </h1>
-          
-          <NuxtLink 
-            to="/admin/application" 
-            class="text-accent hover:underline">
-            Назад к списку
-          </NuxtLink>
-        </div>
-
-        <div v-if="pending" class="text-center py-20">
-          Загрузка...
-        </div>
-
-        <div v-else-if="application" class="max-w-xl mx-auto base-card p-8">
-          <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-4">Информация о клиенте</h2>
-            <div class="space-y-2">
-              <p><span class="font-medium">Имя:</span> {{ application.clientName }}</p>
-              <p><span class="font-medium">Телефон:</span> {{ application.phone }}</p>
-              <p v-if="application.email"><span class="font-medium">Email:</span> {{ application.email }}</p>
-            </div>
-          </div>
-
-          <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-4">Информация о питомце</h2>
-            <p>{{ application.petName }}</p>
-          </div>
-
-          <div v-if="application.type === 'adoption' && application.adoptionDetails" class="mb-6">
-            <h2 class="text-xl font-semibold mb-4">Детали усыновления</h2>
-            <div class="space-y-2">
-              <p><span class="font-medium">Количество членов семьи:</span> {{ application.adoptionDetails.familyMemberCount }}</p>
-              <p><span class="font-medium">Опыт содержания питомцев:</span> {{ application.adoptionDetails.hadExperienceAdoptionPet }}</p>
-              <p><span class="font-medium">Цель усыновления:</span> {{ application.adoptionDetails.adoptionPurpose }}</p>
-              <p><span class="font-medium">Тип жилья:</span> {{ application.adoptionDetails.housingType }}</p>
-              <p><span class="font-medium">Площадь жилья:</span> {{ application.adoptionDetails.housingArea }}</p>
-            </div>
-          </div>
-
-          <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-4">Дата заявки</h2>
-            <p>{{ formatDate(application.createdAt) }}</p>
-          </div>
-
-          <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">Статус заявки</h2>
-            <select 
-              v-model="application.status" 
-              class="w-full p-2 border border-gray-300 rounded-lg">
-              <option value="pending">Новая</option>
-              <option value="in_progress">В работе</option>
-              <option value="approved">Принято</option>
-              <option value="rejected">Отклонено</option>
-            </select>
-          </div>
-
-          <div class="flex gap-4">
-            <button 
-              @click="handleSave" 
-              class="bg-accent text-white rounded-xl px-6 py-3 hover:bg-accent-dark transition">
-              Сохранить изменения
-            </button>
-            
-            <button 
-              @click="goBack" 
-              class="bg-gray-300 text-gray-700 rounded-xl px-6 py-3 hover:bg-gray-400 transition">
-              Отмена
-            </button>
-          </div>
-        </div>
-
-        <div v-else class="text-center py-20">
-          <p>Заявка не найдена</p>
-        </div>
-      </div>
-    </main>
-  </div>
-</template>
-
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
+
+import { ref, computed, watch } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
 const applicationId = Number(route.params.id)
+
 interface RequestApiResponse {
   id: number
   dog_id: number
@@ -99,15 +16,7 @@ interface RequestApiResponse {
   status: string
   type: string
   created_at: string
-  closed_at: string | null
-  adoption_request: {
-    family_member_count: string
-    had_experience_adoption_pet: string
-    adoption_purpose: string
-    housing_type: string
-    housing_area: string
-  } | null
-  guardian_request: {} | null
+  adoption_request?: Record<string, any> | null
 }
 
 interface Application {
@@ -120,123 +29,243 @@ interface Application {
   status: 'pending' | 'in_progress' | 'approved' | 'rejected'
   createdAt: Date
   petId: number
-  adoptionDetails?: {
-    familyMemberCount: string
-    hadExperienceAdoptionPet: string
-    adoptionPurpose: string
-    housingType: string
-    housingArea: string
-  }
+  adoptionDetails?: Record<string, any>
 }
 
 const application = ref<Application | null>(null)
+const localStatus = ref<Application['status']>('pending')
+const isLoading = ref(false)
+const errorMessage = ref<string | null>(null)
 
 const { pending } = await useAsyncData(
   `request-${applicationId}`,
   async () => {
-    try {
-      const response = await $fetch<RequestApiResponse>(
-        `http://localhost:8000/requests/${applicationId}`
-      )
-      const getStatusKey = (status: string): Application['status'] => {
-        const statusMap: Record<string, Application['status']> = {
-          'Новая': 'pending',
-          'В работе': 'in_progress',
-          'Принято': 'approved',
-          'Отклонено': 'rejected'
-        }
-        return statusMap[status] || 'pending'
+    const response = await $fetch<RequestApiResponse>(
+      `http://localhost:8000/requests/${applicationId}`
+    )
+
+    let petName = 'Питомец не указан'
+    if (response.dog_id) {
+      try {
+        const dog = await $fetch<{ name: string }>(
+          `http://localhost:8000/dogs/${response.dog_id}`
+        )
+        petName = dog.name
+      } catch {
+        petName = `Собака #${response.dog_id}`
       }
-      const getType = (type: string): 'adoption' | 'custody' => {
-        return type === 'Усыновление' ? 'adoption' : 'custody'
-      }
-      const petName = response.dog_id === 0 
-        ? 'Питомец не указан' 
-        : `Собака #${response.dog_id}`
-      
-      application.value = {
-        id: response.id,
-        petName: petName,
-        clientName: response.full_name,
-        phone: response.phone,
-        email: response.email ?? undefined,
-        type: getType(response.type),
-        status: getStatusKey(response.status),
-        createdAt: new Date(response.created_at),
-        petId: response.dog_id
-      }
-      if (response.adoption_request) {
-        application.value.adoptionDetails = {
-          familyMemberCount: response.adoption_request.family_member_count,
-          hadExperienceAdoptionPet: response.adoption_request.had_experience_adoption_pet,
-          adoptionPurpose: response.adoption_request.adoption_purpose,
-          housingType: response.adoption_request.housing_type,
-          housingArea: response.adoption_request.housing_area
-        }
-      }
-      
-      return response
-    } catch (error) {
-      console.error('Ошибка при загрузке заявки:', error)
-      return null
     }
-  },
-  {
-    server: true,
-    lazy: false
+
+    application.value = {
+      id: response.id,
+      petName,
+      clientName: response.full_name,
+      phone: response.phone,
+      email: response.email ?? undefined,
+      type: response.type === 'Усыновление' ? 'adoption' : 'custody',
+      status: ({
+        'Новая': 'pending',
+        'В работе': 'in_progress',
+        'Принято': 'approved',
+        'Отклонено': 'rejected'
+      } as any)[response.status] || 'pending',
+      createdAt: new Date(response.created_at),
+      petId: response.dog_id,
+      adoptionDetails: response.adoption_request ?? undefined
+    }
+
+    return true
   }
 )
 
-const handleSave = async () => {
-  if (!application.value) return
+watch(application, val => {
+  if (val) localStatus.value = val.status
+})
 
+
+const adoptionFieldLabels: Record<string, string> = {
+  family_member_count: 'Семья',
+  had_experience_adoption_pet: 'Опыт с питомцами',
+  adoption_purpose: 'Цель усыновления',
+  housing_type: 'Тип жилья',
+  housing_area: 'Площадь жилья'
+}
+
+const saveStatus = async () => {
+  if (!application.value) return
+  
+  isLoading.value = true
+  errorMessage.value = null
+  
   try {
-    const getStatusText = (status: Application['status']): string => {
-      const statusMap: Record<Application['status'], string> = {
-        'pending': 'Новая',
-        'in_progress': 'В работе',
-        'approved': 'Принято',
-        'rejected': 'Отклонено'
-      }
-      return statusMap[status]
+    const statusMapping = {
+      pending: 'Новая',
+      in_progress: 'В работе',
+      approved: 'Завершена', 
+      rejected: 'Отклонено'
     }
     
     await $fetch(
       `http://localhost:8000/requests/${applicationId}`,
       {
-        method: 'PATCH',
-        body: { 
-          status: getStatusText(application.value.status)
+        method: 'PUT',
+        body: {
+          dog_id: application.value.petId,
+          full_name: application.value.clientName,
+          phone: application.value.phone,
+          email: application.value.email || null,
+          status: statusMapping[localStatus.value as keyof typeof statusMapping],
+          type: application.value.type === 'adoption' ? 'Усыновление' : 'Опекунство'
         }
       }
     )
-
-    alert('Изменения сохранены')
+    
+    if (application.value) {
+      application.value.status = localStatus.value
+    }
+    
+    alert('Статус успешно обновлен')
     router.push('/admin/application')
-  } catch (error) {
-    console.error('Ошибка при сохранении:', error)
-    alert('Ошибка при сохранении')
+    
+  } catch (error: any) {
+    console.error('Ошибка при сохранении статуса:', error)
+    errorMessage.value = 'Не удалось обновить статус заявки'
+    try {
+      await $fetch(
+        `http://localhost:8000/requests/${applicationId}/status?status=${localStatus.value}`,
+        { method: 'POST' }
+      )
+    } catch (secondError) {
+      errorMessage.value = 'Ошибка сервера. Проверьте консоль для деталей.'
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 
-const goBack = () => {
-  router.push('/admin/application')
+const goBack = () => router.back()
+
+const handleContact = () => {
+  if (!application.value) return
+  window.location.href = `tel:${application.value.phone}`
 }
 
-const pageTitle = computed(() => {
-  if (!application.value) return 'Заявка'
-  
-  return application.value.type === 'adoption'
+const pageTitle = computed(() =>
+  application.value?.type === 'adoption'
     ? 'Заявка на усыновление'
-    : 'Заявка на опеку'
-})
+    : 'Заявка на опекунство'
+)
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
+const getStatusText = (s: Application['status']) => ({
+  pending: 'Новая',
+  in_progress: 'В работе',
+  approved: 'Завершена', 
+  rejected: 'Отклонено'
+}[s])
+
+const getStatusClass = (s: Application['status']) => ({
+  pending: 'text-blue-500 border-blue-500',
+  in_progress: 'text-yellow-500 border-yellow-500',
+  approved: 'text-green-500 border-green-500',
+  rejected: 'text-red-500 border-red-500'
+}[s])
 </script>
+
+<template>
+  <div class="min-h-screen bg-bg font-cuprum">
+    <main class="base-section pt-10">
+      <div class="base-container mx-auto relative flex justify-center items-center mb-2">
+        <svg 
+          class="absolute left-0 cursor-pointer" 
+          @click="goBack" 
+          width="55" 
+          height="47"
+          viewBox="0 0 55 47" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg">
+          <path 
+            d="M43.5416 23.5H11.4583" 
+            stroke="#1A3C40" 
+            stroke-width="5" 
+            stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path 
+            d="M27.4999 37.2083L11.4583 23.5L27.4999 9.79166" 
+            stroke="#1A3C40" 
+            stroke-width="5"
+            stroke-linecap="round" 
+            stroke-linejoin="round" />
+        </svg>
+
+        <h1 class="text-2xl text-text-primary text-center font-bold">
+          {{ pageTitle }}
+        </h1>
+      </div>
+
+      <div class="mx-auto base-container p-9 py-3 max-w-3xl">
+        <div v-if="pending" class="text-center py-20">
+          Загрузка..
+        </div>
+
+        <div v-else-if="application" class="base-card rounded-2xl p-8 shadow-xl relative">
+          <span
+            :class="[
+              'absolute top-6 right-6 text-base px-6 py-1 rounded-full border-2',
+              getStatusClass(application.status)
+            ]">
+            {{ getStatusText(application.status) }}
+          </span>
+
+          <h2 class="text-2xl text-text-primary mb-8 text-center">
+            {{ application.petName }}
+          </h2>
+          <div class="space-y-1 mb-6 text-lg">
+            <p>{{ application.clientName }}</p>
+            <p>{{ application.phone }}</p>
+            <p v-if="application.email">{{ application.email }}</p>
+          </div>
+          <div v-if="application.type === 'adoption' && application.adoptionDetails" class="mb-6 space-y-1 text-lg">
+            <h3 class="text-lg mb-2 underline">Результаты анкетирования</h3>
+            <p v-for="(value, key) in application.adoptionDetails" :key="key">
+                {{ adoptionFieldLabels[key] ?? key }}: {{ value }}
+            </p>
+          </div>
+          
+          <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+            {{ errorMessage }}
+          </div>
+          
+          <p class="mb-2">Статус заявки</p>
+
+          <div class="relative inline-block w-48 mb-6">
+            <select
+              v-model="localStatus"
+              class="w-full appearance-none bg-transparent border-2 border-text-secondary rounded-xl px-4 py-2 pr-10"
+              :disabled="isLoading">
+              <option value="pending">Новая</option>
+              <option value="in_progress">В работе</option>
+              <option value="approved">Завершена</option> 
+              <option value="rejected">Отклонено</option>
+            </select>
+            <span class="absolute right-4 top-1/2 -translate-y-1/2">^</span>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button 
+              @click="saveStatus" 
+              class="btn px-1 py-1"
+              :disabled="isLoading">
+              {{ isLoading ? 'Сохранение...' : 'Сохранить' }}
+            </button>
+            <button 
+              @click="handleContact" 
+              class="secondary-btn px-1 py-1"
+              :disabled="isLoading">
+              Связаться
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
