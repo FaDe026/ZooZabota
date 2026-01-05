@@ -3,15 +3,13 @@
     <main class="base-section pt-10">
       <div class="mx-auto base-container p-9 py-3">
         <div v-if="pending" class="text-center py-20">
-          Загрузка...
+          Загрузка..
         </div>
-
         <div v-else class="max-w-6xl mx-auto">
           <div class="mb-10 text-center">
             <h1 class="text-2xl text-text-primary mb-8 font-normal">
               Заявки
             </h1>
-
             <div class="flex flex-wrap gap-2 mb-10 justify-center">
               <button
                 v-for="filter in filters"
@@ -22,54 +20,44 @@
                   activeFilter === filter.id
                     ? 'base-card text-accent border-2 border-accent'
                     : 'base-card'
-                ]"
-              >
+                ]">
                 {{ filter.name }}
               </button>
             </div>
           </div>
-
           <div v-if="filteredApplications.length === 0" class="text-center py-10">
             <p class="text-lg">Заявки не найдены</p>
           </div>
-
           <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div
               v-for="application in filteredApplications"
               :key="application.id"
-              class="card-bg rounded-2xl overflow-hidden shadow-2xl border border-gray-200"
-            >
+              class="card-bg rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
               <div class="p-4">
                 <div class="flex justify-between items-center mb-4">
                   <h2 class="text-xl">
                     {{ application.petName }}
                   </h2>
-
                   <span :class="getStatusClass(application.status)">
                     {{ getStatusText(application.status) }}
                   </span>
                 </div>
-
                 <div class="flex justify-between items-start mb-4">
-                  <div>
+                  <div class="text-text-secondary">
                     <p>{{ application.clientName }}</p>
                     <p>{{ application.phone }}</p>
                   </div>
-
                   <NuxtLink
                     :to="`/admin/application/${application.id}`"
-                    class="bg-accent text-white rounded-xl px-4 py-2"
-                  >
+                    class="bg-accent text-white rounded-xl px-4 py-2">
                     Просмотр
                   </NuxtLink>
                 </div>
-
                 <div class="flex justify-between items-center">
-                  <p class="text-sm">
+                  <p class="text-sm text-text-secondary">
                     {{ formatDate(application.createdAt) }}
                   </p>
-
-                  <span>
+                  <span class="text-text-secondary text-xl">
                     {{ application.type === 'adoption'
                       ? 'Забрать домой'
                       : 'Опекунство' }}
@@ -86,24 +74,21 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
+
 interface RequestApiResponse {
   id: number
   dog_id: number
   full_name: string
   phone: string
   email: string | null
-  status: string  
-  type: string    
+  status: string
+  type: string
   created_at: string
-  closed_at: string | null
-  adoption_request: {
-    family_member_count: string
-    had_experience_adoption_pet: string
-    adoption_purpose: string
-    housing_type: string
-    housing_area: string
-  } | null
-  guardian_request: {} | null
+}
+
+interface DogApiResponse {
+  id: number
+  name: string
 }
 
 interface Application {
@@ -124,59 +109,60 @@ const filters = [
   { id: 'all', name: 'Все' },
   { id: 'adoption', name: 'Забрать домой' },
   { id: 'custody', name: 'Опекунство' }
-] as const satisfies readonly { id: FilterType; name: string }[]
+] as const
 
 const activeFilter = ref<FilterType>('all')
+
+const fetchDogName = async (dogId: number): Promise<string> => {
+  try {
+    const dog = await $fetch<DogApiResponse>(
+      `http://localhost:8000/dogs/${dogId}`
+    )
+    return dog.name
+  } catch {
+    return `Собака #${dogId}`
+  }
+}
+
 const { data, pending } = await useAsyncData(
   'requests',
   async () => {
-    try {
-      const response = await $fetch<RequestApiResponse[]>(
-        'http://localhost:8000/requests'
-      )
-      
-      return response.map(r => {
-        const getStatusKey = (status: string): Application['status'] => {
-          const statusMap: Record<string, Application['status']> = {
-            'Новая': 'pending',
-            'В работе': 'in_progress',
-            'Принято': 'approved',
-            'Отклонено': 'rejected'
-          }
-          return statusMap[status] || 'pending'
-        }
-        const getType = (type: string): 'adoption' | 'custody' => {
-          return type === 'Усыновление' ? 'adoption' : 'custody'
-        }
-        const petName = r.dog_id === 0 
-          ? 'Питомец не указан' 
-          : `Собака #${r.dog_id}`
-        
-        return {
-          id: r.id,
-          petName: petName,
-          clientName: r.full_name,
-          phone: r.phone,
-          email: r.email ?? undefined,
-          type: getType(r.type),
-          status: getStatusKey(r.status),
-          createdAt: new Date(r.created_at),
-          petId: r.dog_id
-        }
+    const response = await $fetch<RequestApiResponse[]>(
+      'http://localhost:8000/requests'
+    )
+
+    const dogNameMap = new Map<number, string>()
+    const dogIds = [...new Set(response.map(r => r.dog_id).filter(Boolean))]
+
+    await Promise.all(
+      dogIds.map(async id => {
+        dogNameMap.set(id, await fetchDogName(id))
       })
-    } catch (error) {
-      console.error('Ошибка при загрузке заявок:', error)
-      return []
-    }
+    )
+
+    return response.map(r => ({
+      id: r.id,
+      petName: r.dog_id
+        ? dogNameMap.get(r.dog_id) ?? `Собака #${r.dog_id}`
+        : 'Питомец не указан',
+      clientName: r.full_name,
+      phone: r.phone,
+      email: r.email ?? undefined,
+      type: r.type === 'Усыновление' ? 'adoption' : 'custody',
+      status: ({
+        'Новая': 'pending',
+        'В работе': 'in_progress',
+        'Принято': 'approved',
+        'Отклонено': 'rejected'
+      } as any)[r.status] ?? 'pending',
+      createdAt: new Date(r.created_at),
+      petId: r.dog_id
+    }))
   },
-  {
-    server: true,
-    lazy: false,
-    default: () => []
-  }
+  { default: () => [] }
 )
 
-const applications = computed(() => data.value || [])
+const applications = computed(() => data.value)
 
 const filteredApplications = computed(() => {
   if (activeFilter.value === 'adoption') {
@@ -187,6 +173,7 @@ const filteredApplications = computed(() => {
   }
   return applications.value
 })
+
 const getStatusText = (s: Application['status']) => ({
   pending: 'Новая',
   in_progress: 'В работе',
