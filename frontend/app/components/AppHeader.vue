@@ -40,7 +40,7 @@ function hamburgerClicked() {
                 <NuxtLink href="/ourPets" class="nav-btn">Наши питомцы</NuxtLink>
                 <NuxtLink href="/help" class="nav-btn sm:hidden">Помочь приюту</NuxtLink>
                 <NuxtLink href="/news" class="nav-btn">Новости</NuxtLink>
-                <NuxtLink href="" class="nav-btn">Контакты</NuxtLink>
+                <NuxtLink href="/contact" class="nav-btn">Контакты</NuxtLink>
             </nav>
         </div>
     </header>
