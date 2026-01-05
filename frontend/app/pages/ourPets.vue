@@ -9,10 +9,14 @@ const selectedDog = ref<Dog | undefined>(undefined)
 const emptyDog = {
     id: -1,
     name: "",
+    age: 0,
+    breed: "",
     gender: DogGender.female,
-    vetirinary_passport: false,
+    veterinary_passport: false,
     description: "",
-    intake_date: ""
+    intake_date: "",
+    tags: [],
+    image_url: null
 } as Dog
 
 const dogToDisplay = computed(() => {
@@ -74,7 +78,7 @@ const handleCustodySubmit = (formData: any) => {
     closeCustodyModal()
 }
 
-const { data: dogs, error } = useServerFetch<Dog[]>("/dogs")
+const { data: dogs, error, pending } = useServerFetch<Dog[]>("/dogs")
 
 const isDogListEmpty = computed(() => {
     return dogs.value && dogs.value.length === 0
@@ -104,8 +108,12 @@ const isErrorPresent = computed(() => {
                         <Icon name="material-symbols:keyboard-arrow-down" class="text-2xl" />
                     </button>
                 </div>
+                <div class="base-container mx-auto flex justify-center items-center w-full h-100 text-alert text-center text-2xl"
+                    v-if="pending">
+                    Загружаем питомцев...
+                </div>
                 <div class="base-container mx-auto flex justify-center items-center w-full h-100 text-text-secondary text-center text-2xl"
-                    v-if="isDogListEmpty">
+                    v-else-if="isDogListEmpty">
                     Собачек пока нет в приюте.
                 </div>
                 <div class="base-container mx-auto flex justify-center items-center w-full h-100 text-alert text-center text-2xl"

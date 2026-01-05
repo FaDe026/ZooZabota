@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { DogGender } from '~/types/dogGender';
 
+const config = useRuntimeConfig()
+
 const { dog } = defineProps<{
     dog: Dog
 }>()
@@ -14,9 +16,14 @@ const gender = computed(() => {
     return (dog.gender === DogGender.male) ? "Мужской" : "Женский"
 })
 const veterinaryPassport = computed(() => {
-    return (dog.vetirinary_passport) ? "есть" : "нет"
+    return (dog.veterinary_passport) ? "есть" : "нет"
 })
-
+const imageUrl = computed(() => {
+    return `${config.public.apiBase}${dog.image_url}`
+})
+const hasImage = computed(() => {
+    return (dog.image_url) ? true : false
+})
 function openCustodyModal() {
     emit('openCustodyModal')
 }
@@ -28,8 +35,9 @@ function openTakeModal() {
 <template>
     <div
         class="bg-linear-to-b from-white to-[#F9F7F2] rounded-2xl overflow-hidden shadow-lg border border-gray-200 cursor-pointer transition-transform hover:scale-105 duration-300">
-        <div class="w-full h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
-            <img v-if="dog.image" :src="dog.image" :alt="dog.name" class="w-full h-full object-cover">
+        <div
+            class="w-full h-64 bg-gray-200 flex items-center justify-center overflow-hidden  rounded-bl-xl rounded-br-xl">
+            <img v-if="hasImage" :src="imageUrl" :alt="dog.name" class="w-full h-full object-cover" lazyload>
             <Icon v-else name="material-symbols:pets" class="text-6xl text-text-secondary" />
         </div>
 
@@ -49,9 +57,9 @@ function openTakeModal() {
             </div>
 
             <div class="flex flex-wrap gap-2 mb-6">
-                <span v-for="tag in dog.tags" :key="tag"
+                <span v-for="tag in dog.tags" :key="tag.id"
                     class="bg-transparent border-2 border-accent text-accent text-xl font-normal rounded-full px-4 py-1">
-                    {{ tag }}
+                    {{ tag.name }}
                 </span>
             </div>
         </div>
