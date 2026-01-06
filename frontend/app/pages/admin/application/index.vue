@@ -2,14 +2,31 @@
   <div class="min-h-screen bg-bg font-cuprum">
     <main class="base-section pt-10">
       <div class="mx-auto base-container p-9 py-3">
-        <div v-if="pending" class="text-center py-20">
-          Загрузка..
-        </div>
+        <div v-if="pending" class="text-center py-20">Загрузка..</div>
         <div v-else class="max-w-6xl mx-auto">
           <div class="mb-10 text-center">
-            <h1 class="text-2xl text-text-primary mb-8 font-normal">
-              Заявки
-            </h1>
+             <svg
+            class="absolute left-70 cursor-pointer"
+            @click="backClicked()"
+            width="55"
+            height="47"
+            viewBox="0 0 55 47"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M43.5416 23.5H11.4583"
+              stroke="#1A3C40"
+              stroke-width="5"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+            <path
+              d="M27.4999 37.2083L11.4583 23.5L27.4999 9.79166"
+              stroke="#1A3C40"
+              stroke-width="5"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+          </svg>
+            <h1 class="text-2xl text-text-primary mb-8 font-normal">Заявки</h1>
             <div class="flex flex-wrap gap-2 mb-10 justify-center">
               <button
                 v-for="filter in filters"
@@ -110,6 +127,12 @@ const filters = [
   { id: 'adoption', name: 'Забрать домой' },
   { id: 'custody', name: 'Опекунство' }
 ] as const
+
+const router = useRouter()
+
+function backClicked() {
+  router.back()
+}
 
 const activeFilter = ref<FilterType>('all')
 

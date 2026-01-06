@@ -2,7 +2,7 @@
 definePageMeta({ layout: 'default' })
 
 import { ref, computed, watch } from 'vue'
-import { apiFetch } from '~/composables/useAPI.ts'
+import { apiFetch } from '~/composables/useAPI'
 
 const route = useRoute()
 const router = useRouter()
