@@ -5,6 +5,9 @@ export const clamp = (x: number, min: number, max: number) => {
 export const ageText = (dog: Dog | undefined) => {
     if (!dog) return ""
     const lastDigit = dog.age % 10
+    if (dog.age >= 10 && dog.age <= 19) {
+        return `${dog.age} лет`
+    }
     if (lastDigit >= 2 && lastDigit <= 4) {
         return `${dog.age} года`
     }
