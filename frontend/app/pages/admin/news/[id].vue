@@ -6,27 +6,22 @@ definePageMeta({
 import { apiFetch } from "~/composables/useAPI"
 import { useTags } from '~/composables/useTags'
 
-// Явное определение типа тега (обход ошибки в types.d.ts)
 type Tag = { id: number; name: string }
 
 const router = useRouter()
 const route = useRoute()
 const config = useRuntimeConfig()
 
-// Загрузка новости - исправлена деструктуризация
 const { data: newsData, pending, error } = await useAsyncData<News>(
   `news-${route.params.id}`,
   () => apiFetch(`/news/${String(route.params.id)}`)
 )
 
-// Загрузка тегов - исправлена деструктуризация
 const { data: tagsData, pending: tagsLoading } = await useTags<Tag[]>()
 
-// Реактивные ссылки для удобства
 const news = ref(newsData.value)
 const availableTags = ref(tagsData.value)
 
-// Удаление новости
 const isDeleteModalOpen = ref(false)
 const deleteMessage = ref<string | null>(null)
 const deleteStatus = ref<"none" | "success" | "error">("none")
@@ -53,20 +48,15 @@ async function deleteNews() {
   }
 }
 
-// Редактирование
 const isInEditMode = ref(false)
-
 const editTitle = ref("")
 const editBody = ref("")
 const editPreview = ref("")
 const selectedImage = ref<File | null>(null)
 const previewImage = ref<string | null>(null)
 const selectedTagIds = ref<string[]>([])
-
 const titleError = ref(false)
 const bodyError = ref(false)
-
-// Модалки для тегов
 const isAddTagModalOpen = ref(false)
 const newTagName = ref("")
 const newTagError = ref(false)
@@ -144,7 +134,6 @@ async function confirmDeleteTag() {
   }
 }
 
-// Вычисляемые свойства
 const displayDeleteMessage = computed(() =>
   deleteStatus.value !== "none"
 )
@@ -154,7 +143,6 @@ const deleteMessageClasses = computed(() => ({
   "text-error": deleteStatus.value === "error"
 }))
 
-// Инициализация при загрузке новости
 watch(news, (newNews) => {
   if (newNews?.image_url) {
     previewImage.value = newNews.image_url
@@ -163,12 +151,10 @@ watch(news, (newNews) => {
   }
 }, { immediate: true })
 
-// Навигация
 function backClicked() {
   router.back()
 }
 
-// Переключение режима редактирования
 function toggleEditMode() {
   if (!news.value) return
 
@@ -182,7 +168,6 @@ function toggleEditMode() {
   isInEditMode.value = !isInEditMode.value
 }
 
-// Работа с изображением
 function triggerImageUpload() {
   document.getElementById("imageInput")?.click()
 }
@@ -198,7 +183,6 @@ function handleImageChange(event: Event) {
   reader.readAsDataURL(file)
 }
 
-// Сохранение изменений
 async function saveChanges() {
   if (!news.value) return
 
@@ -232,7 +216,6 @@ async function saveChanges() {
   }
 }
 
-// Форматирование даты
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return '—'
@@ -242,7 +225,6 @@ function formatDate(dateString: string): string {
   return `${day}.${month}.${year}`
 }
 
-// Получение полного URL изображения
 function getImageUrl(path: string | null): string | undefined {
   if (!path) return undefined
   if (path.startsWith('data:')) return path
@@ -260,8 +242,7 @@ function getImageUrl(path: string | null): string | undefined {
         height="47"
         viewBox="0 0 55 47"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+        xmlns="http://www.w3.org/2000/svg">
         <path d="M43.5416 23.5H11.4583" stroke="#1A3C40" stroke-width="5" stroke-linecap="round" />
         <path d="M27.4999 37.2083L11.4583 23.5L27.4999 9.79166" stroke="#1A3C40" stroke-width="5"
           stroke-linecap="round" />
@@ -280,18 +261,15 @@ function getImageUrl(path: string | null): string | undefined {
                 v-if="previewImage"
                 :src="getImageUrl(previewImage)"
                 :alt="news.title"
-                class="w-full h-full object-cover"
-              />
+                class="w-full h-full object-cover"/>
               <Icon
                 v-else
                 name="mdi:newspaper"
-                class="absolute inset-0 m-auto text-6xl text-text-secondary"
-              />
+                class="absolute inset-0 m-auto text-6xl text-text-secondary"/>
               <div
                 v-if="isInEditMode"
                 class="absolute inset-0 bg-black/30 flex items-center justify-center cursor-pointer"
-                @click="triggerImageUpload"
-              >
+                @click="triggerImageUpload">
                 <button class="btn text-xl pointer-events-none">Изменить изображение</button>
               </div>
               <input
@@ -299,8 +277,7 @@ function getImageUrl(path: string | null): string | undefined {
                 type="file"
                 accept="image/*"
                 class="hidden"
-                @change="handleImageChange"
-              />
+                @change="handleImageChange"/>
             </div>
 
             <div class="p-6">
@@ -322,26 +299,21 @@ function getImageUrl(path: string | null): string | undefined {
                   <span
                     v-for="tag in news.tags"
                     :key="tag.id"
-                    class="border-2 border-accent text-accent rounded-full px-4 py-1 text-sm"
-                  >
+                    class="border-2 border-accent text-accent rounded-full px-4 py-1 text-sm">
                     {{ tag.name }}
                   </span>
                 </div>
               </div>
 
               <div v-else class="mb-6 text-text-secondary">
-                <!-- Заголовок -->
                 <div class="mb-4">
                   <input
                     v-model="editTitle"
                     type="text"
                     class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
-                    placeholder="Заголовок новости"
-                  />
+                    placeholder="Заголовок новости"/>
                   <span v-if="titleError" class="text-error text-sm">Заголовок не может быть пустым</span>
                 </div>
-
-                <!-- Краткое описание -->
                 <div class="mb-4">
                   <input
                     v-model="editPreview"
@@ -351,83 +323,17 @@ function getImageUrl(path: string | null): string | undefined {
                   />
                 </div>
 
-                <!-- Основной текст -->
                 <div class="mb-4">
                   <textarea
                     v-model="editBody"
                     rows="6"
                     class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent resize-none"
-                    placeholder="Текст новости"
-                  ></textarea>
+                    placeholder="Текст новости">
+                  </textarea>
                   <span v-if="bodyError" class="text-error text-sm">Текст не может быть пустым</span>
-                </div>
-
-                <!-- Теги -->
-                <div class="mb-6">
-                  <div v-if="tagsLoading" class="text-sm text-text-secondary">Загрузка тегов..</div>
-                  <div v-else class="flex flex-wrap items-center gap-2">
-                    <template v-if="availableTags?.length">
-                      <div
-                        v-for="tag in availableTags"
-                        :key="tag.id"
-                        class="group relative flex items-center gap-2"
-                      >
-                        <label class="cursor-pointer flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            :value="tag.id.toString()"
-                            v-model="selectedTagIds"
-                            class="sr-only peer"
-                          />
-                          <span
-                            class="relative overflow-hidden border rounded-full px-5 py-3 pr-9 text-base font-medium transition-colors duration-150"
-                            :class="selectedTagIds.includes(tag.id.toString())
-                              ? 'text-accent border-accent border-2'
-                              : 'text-text-secondary border-gray-300 border-2'"
-                          >
-                            {{ tag.name }}
-                          </span>
-                        </label>
-                        <button
-                          type="button"
-                          @click.stop="openDeleteTagModal(tag)"
-                          class="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 rounded-full bg-transparent text-accent flex items-center justify-center opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 hover:bg-red-500 hover:text-white transition-all duration-200 ease-out"
-                          title="Удалить тег"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.75"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M6 6l12 12" />
-                            <path d="M18 6l-12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    </template>
-                    <button
-                      type="button"
-                      @click="openAddTagModal"
-                      class="ml-2 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center text-lg hover:bg-opacity-90 transition-opacity"
-                      title="Добавить новый тег"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div
-                    v-if="!tagsLoading && (!availableTags || availableTags.length === 0)"
-                    class="text-sm text-text-secondary"
-                  >
-                    Нет доступных тегов
-                  </div>
                 </div>
               </div>
 
-              <!-- Кнопки -->
               <div class="flex flex-col gap-2 sm:flex-row sm:gap-2 w-full">
                 <button v-if="!isInEditMode" class="btn flex-1" @click="toggleEditMode">Редактировать</button>
                 <button v-else class="btn flex-1" @click="saveChanges">Сохранить</button>
@@ -438,69 +344,5 @@ function getImageUrl(path: string | null): string | undefined {
         </div>
       </main>
     </div>
-
-    <!-- Модалка удаления новости -->
-    <Modal
-      title="Удаление новости"
-      :is-open="isDeleteModalOpen"
-      @close="closeDeleteModal"
-    >
-      <div class="flex flex-col gap-4 p-4">
-        <span>Удалить новость «{{ news?.title }}»?</span>
-        <span v-if="displayDeleteMessage" :class="deleteMessageClasses">
-          {{ deleteMessage }}
-        </span>
-        <div class="flex gap-3 justify-end">
-          <button class="secondary-btn" @click="closeDeleteModal">Отмена</button>
-          <button class="btn" @click="deleteNews">Удалить</button>
-        </div>
-      </div>
-    </Modal>
-
-    <!-- Модалка создания тега -->
-    <Modal
-      v-if="isAddTagModalOpen"
-      title="Создать тег"
-      :is-open="isAddTagModalOpen"
-      @close="closeAddTagModal"
-    >
-      <div class="flex flex-col gap-4 p-4">
-        <div>
-          <label class="block text-text-secondary mb-2">Название тега</label>
-          <input
-            v-model="newTagName"
-            type="text"
-            class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
-            placeholder="Например: Важное"
-            @keyup.enter="createNewTag"
-          />
-          <span v-if="newTagError" class="text-error text-sm mt-1">Поле не может быть пустым</span>
-        </div>
-        <div class="flex gap-3 justify-end">
-          <button class="secondary-btn" @click="closeAddTagModal">Отмена</button>
-          <button class="btn" @click="createNewTag">Создать</button>
-        </div>
-      </div>
-    </Modal>
-
-    <!-- Модалка удаления тега -->
-    <Modal
-      v-if="isDeleteTagModalOpen"
-      title="Удалить тег"
-      :is-open="isDeleteTagModalOpen"
-      @close="closeDeleteTagModal"
-    >
-      <div class="flex flex-col gap-4 p-4">
-        <p>Удалить тег «{{ tagToDelete?.name }}»?</p>
-        <p class="text-sm text-text-secondary">
-          Это действие нельзя отменить. Убедитесь, что тег не используется.
-        </p>
-        <span v-if="deleteTagError" class="text-accent text-sm">{{ deleteTagError }}</span>
-        <div class="flex gap-3 justify-end">
-          <button class="secondary-btn" @click="closeDeleteTagModal">Отмена</button>
-          <button class="btn" @click="confirmDeleteTag">Удалить</button>
-        </div>
-      </div>
-    </Modal>
   </section>
 </template>

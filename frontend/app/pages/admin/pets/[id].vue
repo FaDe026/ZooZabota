@@ -12,11 +12,9 @@ type Tag = Dog['tags'][number]
 const router = useRouter()
 const route = useRoute()
 const config = useRuntimeConfig()
-const {  data: dog, pending, error } = await useAsyncData<Dog>(
-  `dog-${route.params.id}`,
-  () => apiFetch(`/dogs/${String(route.params.id)}`)
+const { data: dog, pending, error } = await useServerFetch<Dog>(
+  `/dogs/${String(route.params.id)}`
 )
-
 const {  data: availableTags, pending: tagsLoading } = useTags<Tag[]>() 
 const isDeleteModalOpen = ref(false)
 const deleteMessage = ref<string | null>(null)
