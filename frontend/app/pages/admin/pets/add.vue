@@ -7,7 +7,6 @@ import { DogGender } from '~/types/dogGender'
 import { apiFetch } from "~/composables/useAPI"
 import { useTags } from '~/composables/useTags'
 
-// Тип тега: извлекаем из глобального Dog
 type Tag = Dog['tags'][number]
 
 const router = useRouter()
@@ -19,21 +18,12 @@ const editGender = ref<DogGender>(DogGender.male)
 const editVetPassport = ref(false)
 const selectedImage = ref<File | null>(null)
 const previewImage = ref<string | null>(null)
-
-// ОБЯЗАТЕЛЬНО для бэкенда
 const editBreed = ref("Неизвестно")
-
 const nameError = ref(false)
 const descriptionError = ref(false)
 const ageError = ref(false)
-
-// Выбранные ID тегов
-const selectedTagIds = ref<number[]>([])
-
-// Загрузка существующих тегов
+const selectedTagIds = ref<string[]>([])
 const {  data: availableTags, pending: tagsLoading } = useTags<Tag[]>()
-
-// === Модалка создания тега ===
 const isAddTagModalOpen = ref(false)
 const newTagName = ref("")
 const newTagError = ref(false)
@@ -104,15 +94,13 @@ async function confirmDeleteTag() {
       availableTags.value = availableTags.value.filter((t: Tag) => t.id !== tagToDelete.value!.id)
     }
 
-    selectedTagIds.value = selectedTagIds.value.filter(id => id !== tagToDelete.value!.id)
+    selectedTagIds.value = selectedTagIds.value.filter(id => id !== tagToDelete.value!.id.toString())
 
     closeDeleteTagModal()
   } catch (e: any) {
     deleteTagError.value = e.response?.data?.detail || "Невозможно удалить тег"
   }
 }
-
-// === Основная логика ===
 function backClicked() {
   router.back()
 }
@@ -251,58 +239,58 @@ function cancelAdd() {
                     </LabeledCheckbox>
                   </div>
                 </div>
-
-                <!-- БЛОК ТЕГОВ С КНОПКОЙ "+" И КРЕСТИКОМ -->
                 <div class="mb-6">
-                  <span class="text-text-secondary block mb-2">Теги:</span>
-
-                  <div v-if="tagsLoading" class="text-sm text-text-secondary">
-                    Загрузка тегов...
-                  </div>
-
+                  <div v-if="tagsLoading" class="text-sm text-text-secondary">Загрузка тегов..</div>
                   <div v-else class="flex flex-wrap items-center gap-2">
                     <template v-if="availableTags?.length">
                       <div
                         v-for="tag in availableTags"
                         :key="tag.id"
-                        class="group relative flex items-center gap-2"
-                      >
+                        class="group relative flex items-center gap-2">
                         <label class="cursor-pointer flex items-center gap-2">
                           <input
                             type="checkbox"
-                            :value="tag.id"
+                            :value="tag.id.toString()"
                             v-model="selectedTagIds"
-                            class="w-4 h-4 accent-accent"
-                          />
-                          <span class="border border-accent text-accent rounded-full px-3 py-1 text-sm">
+                            class="sr-only peer"/>
+                          <span
+                            class="relative overflow-hidden border rounded-full px-5 py-3 pr-9 text-base font-medium transition-colors duration-150"
+                            :class="selectedTagIds.includes(tag.id.toString())
+                              ? 'text-accent border-accent border-2'
+                              : 'text-text-secondary border-gray-300 border-2'">
                             {{ tag.name }}
                           </span>
                         </label>
-
-                        <!-- КРЕСТИК ПРИ НАВЕДЕНИИ -->
                         <button
                           type="button"
                           @click.stop="openDeleteTagModal(tag)"
-                          class="absolute -bottom-1 right-0 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow"
-                          title="Удалить тег"
-                        >
-                          ×
+                          class="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 rounded-full bg-transparent text-accent flex items-center justify-center opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 hover:bg-red-500 hover:text-white transition-all duration-200 ease-out"
+                          title="Удалить тег">
+                          <svg
+                            viewBox="0 0 24 24"
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.75"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M6 6l12 12" />
+                            <path d="M18 6l-12 12" />
+                          </svg>
                         </button>
                       </div>
                     </template>
-
-                    <!-- Кнопка "+ в кружочке" -->
                     <button
                       type="button"
                       @click="openAddTagModal"
                       class="ml-2 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center text-lg hover:bg-opacity-90 transition-opacity"
-                      title="Добавить новый тег"
-                    >
+                      title="Добавить новый тег">
                       +
                     </button>
                   </div>
-
-                  <div v-if="!tagsLoading && (!availableTags || availableTags.length === 0)" class="text-sm text-text-secondary">
+                  <div
+                    v-if="!tagsLoading && (!availableTags || availableTags.length === 0)"
+                    class="text-sm text-text-secondary">
                     Нет доступных тегов
                   </div>
                 </div>
@@ -317,14 +305,11 @@ function cancelAdd() {
         </div>
       </main>
     </div>
-
-    <!-- МОДАЛЬНОЕ ОКНО: СОЗДАНИЕ ТЕГА -->
     <Modal
       v-if="isAddTagModalOpen"
       title="Создать тег"
       :is-open="isAddTagModalOpen"
-      @close="closeAddTagModal"
-    >
+      @close="closeAddTagModal">
       <div class="flex flex-col gap-4 p-4">
         <div>
           <label class="block text-text-secondary mb-2">Название тега</label>
@@ -333,8 +318,7 @@ function cancelAdd() {
             type="text"
             class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
             placeholder="Например: Дружелюбный"
-            @keyup.enter="createNewTag"
-          />
+            @keyup.enter="createNewTag"/>
           <span v-if="newTagError" class="text-error text-sm mt-1">Поле не может быть пустым</span>
         </div>
 
@@ -344,17 +328,14 @@ function cancelAdd() {
         </div>
       </div>
     </Modal>
-
-    <!-- МОДАЛЬНОЕ ОКНО: УДАЛЕНИЕ ТЕГА -->
     <Modal
       v-if="isDeleteTagModalOpen"
       title="Удалить тег"
       :is-open="isDeleteTagModalOpen"
-      @close="closeDeleteTagModal"
-    >
+      @close="closeDeleteTagModal">
       <div class="flex flex-col gap-4 p-4">
         <p>
-          Удалить тег «<strong>{{ tagToDelete?.name }}</strong>»?
+          Удалить тег «{{ tagToDelete?.name }}»?
         </p>
         <p class="text-sm text-text-secondary">
           Это действие нельзя отменить. Убедитесь, что тег не используется.

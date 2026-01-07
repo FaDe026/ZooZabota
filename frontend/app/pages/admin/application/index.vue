@@ -175,7 +175,7 @@ const { data, pending } = await useAsyncData(
       status: ({
         'Новая': 'pending',
         'В работе': 'in_progress',
-        'Принято': 'approved',
+        'Завершена': 'approved',
         'Отклонено': 'rejected'
       } as any)[r.status] ?? 'pending',
       createdAt: new Date(r.created_at),
@@ -200,7 +200,7 @@ const filteredApplications = computed(() => {
 const getStatusText = (s: Application['status']) => ({
   pending: 'Новая',
   in_progress: 'В работе',
-  approved: 'Принято',
+  approved: 'Завершена',
   rejected: 'Отклонено'
 }[s])
 
