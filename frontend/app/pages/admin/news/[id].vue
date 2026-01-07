@@ -12,10 +12,10 @@ const router = useRouter()
 const route = useRoute()
 const config = useRuntimeConfig()
 
-const { data: newsData, pending, error } = await useAsyncData<News>(
-  `news-${route.params.id}`,
-  () => apiFetch(`/news/${String(route.params.id)}`)
+const { data: newsData, pending, error } = await useServerFetch<News>(
+  `/news/${String(route.params.id)}`
 )
+
 
 const { data: tagsData, pending: tagsLoading } = await useTags<Tag[]>()
 
