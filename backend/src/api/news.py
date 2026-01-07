@@ -12,6 +12,7 @@ from src.models.user import UserModel
 from src.utils.auth import get_current_user
 from src.utils.validate_image import validate_and_save_news_image
 from src.utils.validate_array import parse_tag_ids
+from src.api.dependencies import SessionDep
 
 
 router = APIRouter(prefix="/news", tags=["News"])
@@ -145,7 +146,7 @@ async def update_news(
 @router.patch("/{news_id}", response_model=NewsGetSchema)
 async def partial_update_news(
     news_id: int,
-    session: AsyncSession = Depends(get_session),
+    session: SessionDep,
     current_user: UserModel = Depends(get_current_user),
     title: str | None = Form(None),
     body: str | None = Form(None),
@@ -157,7 +158,7 @@ async def partial_update_news(
                     "Передайте пустую строку, чтобы удалить все теги."
     ),
     preview: str | None = Form(None),
-    file: Union[UploadFile, str] = File(None),
+    file: UploadFile = File(None),
 ):
     """Частичное обновление новости. Теги можно обновить или удалить."""
     result = await session.execute(select(NewsModel).where(NewsModel.id == news_id))
@@ -184,7 +185,7 @@ async def partial_update_news(
                 detail="Неверный формат даты. Используйте: YYYY-MM-DD HH:MM"
             )
 
-    if isinstance(file, UploadFile):
+    if file:
         image_url = await validate_and_save_news_image(file)
         update_data["image_url"] = image_url
 

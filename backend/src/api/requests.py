@@ -13,8 +13,7 @@ router = APIRouter(prefix="/requests", tags=["Requests"])
 
 @router.post("", response_model=RequestResponseSchema)
 async def create_request(request_data: RequestCreateSchema,
-                         session: SessionDep,
-                         current_user: UserModel = Depends(get_current_user)):
+                         session: SessionDep):
     request = RequestModel(
         dog_id=request_data.dog_id,
         full_name=request_data.full_name,

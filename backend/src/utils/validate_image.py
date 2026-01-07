@@ -39,4 +39,5 @@ async def validate_and_save_news_image(file: UploadFile) -> str | None:
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
-    return f"/static/news/{filename}"
+    image_url = f"/static/news/{filename}"
+    return image_url
