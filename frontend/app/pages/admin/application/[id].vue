@@ -2,7 +2,7 @@
 definePageMeta({ layout: 'default' })
 
 import { ref, computed, watch } from 'vue'
-import { apiFetch } from '~/composables/useAPI.ts'
+import { apiFetch } from '~/composables/useAPI'
 
 const route = useRoute()
 const router = useRouter()
@@ -63,7 +63,7 @@ const { pending } = await useAsyncData(
       status: ({
         'Новая': 'pending',
         'В работе': 'in_progress',
-        'Принято': 'approved',
+        'Завершена': 'approved',
         'Отклонено': 'rejected'
       } as any)[response.status] || 'pending',
       createdAt: new Date(response.created_at),
@@ -229,7 +229,6 @@ const getStatusClass = (s: Application['status']) => ({
               <option value="pending">Новая</option>
               <option value="in_progress">В работе</option>
               <option value="approved">Завершена</option> 
-              <option value="rejected">Отклонено</option>
             </select>
             <span class="absolute right-4 top-1/2 -translate-y-1/2">^</span>
           </div>

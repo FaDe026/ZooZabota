@@ -3,21 +3,30 @@ definePageMeta({
   layout: "admin"
 })
 
-import { DogGender } from "~/types/dogGender"
 import { apiFetch } from "~/composables/useAPI"
 import { useTags } from '~/composables/useTags'
 
-type Tag = Dog['tags'][number]
+// Явное определение типа тега (обход ошибки в types.d.ts)
+type Tag = { id: number; name: string }
 
 const router = useRouter()
 const route = useRoute()
 const config = useRuntimeConfig()
-const {  data: dog, pending, error } = await useAsyncData<Dog>(
-  `dog-${route.params.id}`,
-  () => apiFetch(`/dogs/${String(route.params.id)}`)
+
+// Загрузка новости - исправлена деструктуризация
+const { data: newsData, pending, error } = await useAsyncData<News>(
+  `news-${route.params.id}`,
+  () => apiFetch(`/news/${String(route.params.id)}`)
 )
 
-const {  data: availableTags, pending: tagsLoading } = useTags<Tag[]>() 
+// Загрузка тегов - исправлена деструктуризация
+const { data: tagsData, pending: tagsLoading } = await useTags<Tag[]>()
+
+// Реактивные ссылки для удобства
+const news = ref(newsData.value)
+const availableTags = ref(tagsData.value)
+
+// Удаление новости
 const isDeleteModalOpen = ref(false)
 const deleteMessage = ref<string | null>(null)
 const deleteStatus = ref<"none" | "success" | "error">("none")
@@ -31,11 +40,11 @@ function closeDeleteModal() {
   deleteStatus.value = "none"
 }
 
-async function deleteDog() {
-  if (!dog.value) return
+async function deleteNews() {
+  if (!news.value) return
   try {
-    await apiFetch(`/dogs/${dog.value.id}`, { method: "DELETE" })
-    deleteMessage.value = "Животное удалено успешно!"
+    await apiFetch(`/news/${news.value.id}`, { method: "DELETE" })
+    deleteMessage.value = "Новость удалена успешно!"
     deleteStatus.value = "success"
     setTimeout(() => router.back(), 500)
   } catch {
@@ -43,20 +52,21 @@ async function deleteDog() {
     deleteStatus.value = "error"
   }
 }
+
+// Редактирование
 const isInEditMode = ref(false)
 
-const editName = ref("")
-const editDescription = ref("")
-const editAge = ref<number>(0)
-const editGender = ref<DogGender>(DogGender.male)
-const editVetPassport = ref(false)
+const editTitle = ref("")
+const editBody = ref("")
+const editPreview = ref("")
 const selectedImage = ref<File | null>(null)
 const previewImage = ref<string | null>(null)
-const editBreed = ref("Неизвестно") 
 const selectedTagIds = ref<string[]>([])
-const nameError = ref(false)
-const descriptionError = ref(false)
-const ageError = ref(false)
+
+const titleError = ref(false)
+const bodyError = ref(false)
+
+// Модалки для тегов
 const isAddTagModalOpen = ref(false)
 const newTagName = ref("")
 const newTagError = ref(false)
@@ -134,6 +144,7 @@ async function confirmDeleteTag() {
   }
 }
 
+// Вычисляемые свойства
 const displayDeleteMessage = computed(() =>
   deleteStatus.value !== "none"
 )
@@ -143,33 +154,35 @@ const deleteMessageClasses = computed(() => ({
   "text-error": deleteStatus.value === "error"
 }))
 
-watch(dog, (newDog) => {
-  if (newDog?.image_url) {
-    previewImage.value = newDog.image_url
+// Инициализация при загрузке новости
+watch(news, (newNews) => {
+  if (newNews?.image_url) {
+    previewImage.value = newNews.image_url
   } else {
     previewImage.value = null
   }
 }, { immediate: true })
 
+// Навигация
 function backClicked() {
   router.back()
 }
 
+// Переключение режима редактирования
 function toggleEditMode() {
-  if (!dog.value) return
+  if (!news.value) return
 
   if (!isInEditMode.value) {
-    editName.value = dog.value.name
-    editDescription.value = dog.value.description
-    editAge.value = dog.value.age
-    editGender.value = dog.value.gender
-    editVetPassport.value = dog.value.veterinary_passport
-    selectedTagIds.value = dog.value.tags.map(t => t.id.toString())
+    editTitle.value = news.value.title
+    editBody.value = news.value.body
+    editPreview.value = news.value.preview || ""
+    selectedTagIds.value = news.value.tags?.map((t: Tag) => t.id.toString()) || []
     selectedImage.value = null
   }
   isInEditMode.value = !isInEditMode.value
 }
 
+// Работа с изображением
 function triggerImageUpload() {
   document.getElementById("imageInput")?.click()
 }
@@ -181,26 +194,25 @@ function handleImageChange(event: Event) {
 
   selectedImage.value = file
   const reader = new FileReader()
-  reader.onload = e => (previewImage.value = e.target?.result as string)
+  reader.onload = e => previewImage.value = e.target?.result as string
   reader.readAsDataURL(file)
 }
 
+// Сохранение изменений
 async function saveChanges() {
-  if (!dog.value) return
+  if (!news.value) return
 
-  nameError.value = !editName.value.trim()
-  descriptionError.value = !editDescription.value.trim()
-  ageError.value = editAge.value <= 0
+  titleError.value = !editTitle.value.trim()
+  bodyError.value = !editBody.value.trim()
 
-  if (nameError.value || descriptionError.value || ageError.value) return
+  if (titleError.value || bodyError.value) return
 
   const formData = new FormData()
-  formData.append("name", editName.value.trim())
-  formData.append("age", editAge.value.toString())
-  formData.append("breed", editBreed.value)
-  formData.append("description", editDescription.value.trim())
-  formData.append("gender", editGender.value)
-  formData.append("veterinary_passport", String(editVetPassport.value))
+  formData.append("title", editTitle.value.trim())
+  formData.append("body", editBody.value.trim())
+  if (editPreview.value.trim()) {
+    formData.append("preview", editPreview.value.trim())
+  }
 
   formData.append("tag_ids", selectedTagIds.value.join(","))
 
@@ -209,17 +221,28 @@ async function saveChanges() {
   }
 
   try {
-    const updated = await apiFetch<Dog>(
-      `/dogs/${dog.value.id}`,
+    const updated = await apiFetch<News>(
+      `/news/${news.value.id}`,
       { method: "PATCH", body: formData }
     )
-    dog.value = updated
+    news.value = updated
     isInEditMode.value = false
   } catch (e) {
     console.error("Ошибка сохранения", e)
   }
 }
 
+// Форматирование даты
+function formatDate(dateString: string): string {
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return '—'
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = String(date.getFullYear()).slice(-2)
+  return `${day}.${month}.${year}`
+}
+
+// Получение полного URL изображения
 function getImageUrl(path: string | null): string | undefined {
   if (!path) return undefined
   if (path.startsWith('data:')) return path
@@ -230,18 +253,25 @@ function getImageUrl(path: string | null): string | undefined {
 <template>
   <section class="flex flex-col gap-4 base-section">
     <div class="base-container mx-auto relative flex justify-center items-center mb-2">
-      <svg class="absolute left-0 cursor-pointer" @click="backClicked" width="55" height="47"
-        viewBox="0 0 55 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        class="absolute left-0 cursor-pointer"
+        @click="backClicked"
+        width="55"
+        height="47"
+        viewBox="0 0 55 47"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <path d="M43.5416 23.5H11.4583" stroke="#1A3C40" stroke-width="5" stroke-linecap="round" />
         <path d="M27.4999 37.2083L11.4583 23.5L27.4999 9.79166" stroke="#1A3C40" stroke-width="5"
           stroke-linecap="round" />
       </svg>
-      <h1 class="text-2xl text-primary font-bold">Животные</h1>
+      <h1 class="text-2xl text-primary font-bold">Новости</h1>
     </div>
 
     <div v-if="pending" class="text-center py-20 text-xl">Загрузка..</div>
     <div v-else-if="error" class="text-center py-20 text-error text-xl">Ошибка загрузки</div>
-    <div v-else-if="dog" class="min-h-screen bg-bg font-cuprum">
+    <div v-else-if="news" class="min-h-screen bg-bg font-cuprum">
       <main class="base-section pt-10">
         <div class="base-container mx-auto">
           <div class="card-bg rounded-2xl overflow-hidden shadow-lg">
@@ -249,102 +279,90 @@ function getImageUrl(path: string | null): string | undefined {
               <img
                 v-if="previewImage"
                 :src="getImageUrl(previewImage)"
-                :alt="dog.name"
-                class="w-full h-full object-cover"/>
-              <Icon v-else name="material-symbols:pets"
-                class="absolute inset-0 m-auto text-6xl text-text-secondary" />
-              <div v-if="isInEditMode"
+                :alt="news.title"
+                class="w-full h-full object-cover"
+              />
+              <Icon
+                v-else
+                name="mdi:newspaper"
+                class="absolute inset-0 m-auto text-6xl text-text-secondary"
+              />
+              <div
+                v-if="isInEditMode"
                 class="absolute inset-0 bg-black/30 flex items-center justify-center cursor-pointer"
-                @click="triggerImageUpload">
-                <button class="btn text-xl pointer-events-none">Изменить фотографию</button>
+                @click="triggerImageUpload"
+              >
+                <button class="btn text-xl pointer-events-none">Изменить изображение</button>
               </div>
-              <input id="imageInput" type="file" accept="image/*" class="hidden" @change="handleImageChange" />
+              <input
+                id="imageInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleImageChange"
+              />
             </div>
 
             <div class="p-6">
-              <h2 class="section-title text-center mb-4">
-                {{ dog.name }}
+              <h2 class="section-title text-center mb-2">
+                {{ news.title }}
               </h2>
+              <p class="text-text-secondary text-sm text-center mb-4">
+                {{ formatDate(news.date) }}
+              </p>
+
               <div v-if="!isInEditMode" class="mb-6">
-                <div v-if="dog.description" class="mb-4 text-text-primary text-lg">
-                  <p>{{ dog.description }}</p>
+                <div v-if="news.preview" class="mb-3 text-text-primary text-lg">
+                  <p>{{ news.preview }}</p>
                 </div>
-                <div class="mb-2 text-text-secondary text-lg">
-                  <p>Пол: {{ dog.gender === DogGender.male ? 'Мужской' : 'Женский' }} </p>
-                  <p>Возраст: {{ dog.age }} лет</p>
-                  <p>Ветпаспорт: {{ dog.veterinary_passport ? 'есть' : 'нет' }}</p>
+                <div class="mb-4 text-text-primary text-lg whitespace-pre-line">
+                  <p>{{ news.body }}</p>
                 </div>
-                <div class="flex flex-wrap gap-2 mb-6 text-lg">
+                <div v-if="news.tags && news.tags.length > 0" class="flex flex-wrap gap-2 mb-6">
                   <span
-                    v-for="tag in dog.tags"
+                    v-for="tag in news.tags"
                     :key="tag.id"
-                    class="border-2 border-accent text-accent rounded-full px-4 py-1">
+                    class="border-2 border-accent text-accent rounded-full px-4 py-1 text-sm"
+                  >
                     {{ tag.name }}
                   </span>
                 </div>
               </div>
 
               <div v-else class="mb-6 text-text-secondary">
+                <!-- Заголовок -->
                 <div class="mb-4">
                   <input
-                    v-model="editName"
+                    v-model="editTitle"
                     type="text"
                     class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
-                    placeholder="Имя собаки"/>
-                  <span v-if="nameError" class="text-error text-sm">Имя не может быть пустым</span>
+                    placeholder="Заголовок новости"
+                  />
+                  <span v-if="titleError" class="text-error text-sm">Заголовок не может быть пустым</span>
                 </div>
 
+                <!-- Краткое описание -->
+                <div class="mb-4">
+                  <input
+                    v-model="editPreview"
+                    type="text"
+                    class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
+                    placeholder="Краткое описание (необязательно)"
+                  />
+                </div>
+
+                <!-- Основной текст -->
                 <div class="mb-4">
                   <textarea
-                    v-model="editDescription"
-                    rows="3"
+                    v-model="editBody"
+                    rows="6"
                     class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent resize-none"
-                    placeholder="Описание">
-                  </textarea>
-                  <span v-if="descriptionError" class="text-error text-sm">Описание не может быть пустым</span>
+                    placeholder="Текст новости"
+                  ></textarea>
+                  <span v-if="bodyError" class="text-error text-sm">Текст не может быть пустым</span>
                 </div>
 
-                <div class="flex flex-col gap-4 mb-4 text-text-secondary">
-                  <div>
-                    <label class="block mb-2">Возраст (лет)</label>
-                    <input
-                      v-model.number="editAge"
-                      type="number"
-                      min="0"
-                      class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"/>
-                    <span v-if="ageError" class="text-error text-sm">Возраст должен быть больше 0</span>
-                  </div>
-
-                  <div>
-                    <label class="block mb-2">Пол</label>
-                    <div class="flex gap-4">
-                      <label class="flex items-center gap-2 cursor-pointer font-normal">
-                        <input
-                          type="radio"
-                          :value="DogGender.male"
-                          v-model="editGender"
-                          class="w-4 h-4 accent-accent"/>
-                        <span>Мужской</span>
-                      </label>
-                      <label class="flex items-center gap-2 cursor-pointer font-normal">
-                        <input
-                          type="radio"
-                          :value="DogGender.female"
-                          v-model="editGender"
-                          class="w-4 h-4 accent-accent"/>
-                        <span>Женский</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mb-4 text-text-secondary">
-                  <div>
-                    <LabeledCheckbox postion="after" name="vetPassport" v-model="editVetPassport">
-                      Ветпаспорт:
-                    </LabeledCheckbox>
-                  </div>
-                </div>
+                <!-- Теги -->
                 <div class="mb-6">
                   <div v-if="tagsLoading" class="text-sm text-text-secondary">Загрузка тегов..</div>
                   <div v-else class="flex flex-wrap items-center gap-2">
@@ -352,18 +370,21 @@ function getImageUrl(path: string | null): string | undefined {
                       <div
                         v-for="tag in availableTags"
                         :key="tag.id"
-                        class="group relative flex items-center gap-2">
+                        class="group relative flex items-center gap-2"
+                      >
                         <label class="cursor-pointer flex items-center gap-2">
                           <input
                             type="checkbox"
                             :value="tag.id.toString()"
                             v-model="selectedTagIds"
-                            class="sr-only peer"/>
+                            class="sr-only peer"
+                          />
                           <span
                             class="relative overflow-hidden border rounded-full px-5 py-3 pr-9 text-base font-medium transition-colors duration-150"
                             :class="selectedTagIds.includes(tag.id.toString())
                               ? 'text-accent border-accent border-2'
-                              : 'text-text-secondary border-gray-300 border-2'">
+                              : 'text-text-secondary border-gray-300 border-2'"
+                          >
                             {{ tag.name }}
                           </span>
                         </label>
@@ -371,7 +392,8 @@ function getImageUrl(path: string | null): string | undefined {
                           type="button"
                           @click.stop="openDeleteTagModal(tag)"
                           class="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 rounded-full bg-transparent text-accent flex items-center justify-center opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 hover:bg-red-500 hover:text-white transition-all duration-200 ease-out"
-                          title="Удалить тег">
+                          title="Удалить тег"
+                        >
                           <svg
                             viewBox="0 0 24 24"
                             class="w-3.5 h-3.5"
@@ -379,7 +401,8 @@ function getImageUrl(path: string | null): string | undefined {
                             stroke="currentColor"
                             stroke-width="1.75"
                             stroke-linecap="round"
-                            stroke-linejoin="round">
+                            stroke-linejoin="round"
+                          >
                             <path d="M6 6l12 12" />
                             <path d="M18 6l-12 12" />
                           </svg>
@@ -390,17 +413,21 @@ function getImageUrl(path: string | null): string | undefined {
                       type="button"
                       @click="openAddTagModal"
                       class="ml-2 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center text-lg hover:bg-opacity-90 transition-opacity"
-                      title="Добавить новый тег">
+                      title="Добавить новый тег"
+                    >
                       +
                     </button>
                   </div>
                   <div
                     v-if="!tagsLoading && (!availableTags || availableTags.length === 0)"
-                    class="text-sm text-text-secondary">
+                    class="text-sm text-text-secondary"
+                  >
                     Нет доступных тегов
                   </div>
                 </div>
               </div>
+
+              <!-- Кнопки -->
               <div class="flex flex-col gap-2 sm:flex-row sm:gap-2 w-full">
                 <button v-if="!isInEditMode" class="btn flex-1" @click="toggleEditMode">Редактировать</button>
                 <button v-else class="btn flex-1" @click="saveChanges">Сохранить</button>
@@ -411,23 +438,32 @@ function getImageUrl(path: string | null): string | undefined {
         </div>
       </main>
     </div>
-    <Modal title="Удаление карточки" :is-open="isDeleteModalOpen" @close="closeDeleteModal">
+
+    <!-- Модалка удаления новости -->
+    <Modal
+      title="Удаление новости"
+      :is-open="isDeleteModalOpen"
+      @close="closeDeleteModal"
+    >
       <div class="flex flex-col gap-4 p-4">
-        <span>Удалить карточку «{{ dog?.name }}»?</span>
+        <span>Удалить новость «{{ news?.title }}»?</span>
         <span v-if="displayDeleteMessage" :class="deleteMessageClasses">
           {{ deleteMessage }}
         </span>
         <div class="flex gap-3 justify-end">
           <button class="secondary-btn" @click="closeDeleteModal">Отмена</button>
-          <button class="btn" @click="deleteDog">Удалить</button>
+          <button class="btn" @click="deleteNews">Удалить</button>
         </div>
       </div>
     </Modal>
+
+    <!-- Модалка создания тега -->
     <Modal
       v-if="isAddTagModalOpen"
       title="Создать тег"
       :is-open="isAddTagModalOpen"
-      @close="closeAddTagModal">
+      @close="closeAddTagModal"
+    >
       <div class="flex flex-col gap-4 p-4">
         <div>
           <label class="block text-text-secondary mb-2">Название тега</label>
@@ -435,8 +471,9 @@ function getImageUrl(path: string | null): string | undefined {
             v-model="newTagName"
             type="text"
             class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
-            placeholder="Например: Дружелюбный"
-            @keyup.enter="createNewTag"/>
+            placeholder="Например: Важное"
+            @keyup.enter="createNewTag"
+          />
           <span v-if="newTagError" class="text-error text-sm mt-1">Поле не может быть пустым</span>
         </div>
         <div class="flex gap-3 justify-end">
@@ -445,14 +482,19 @@ function getImageUrl(path: string | null): string | undefined {
         </div>
       </div>
     </Modal>
+
+    <!-- Модалка удаления тега -->
     <Modal
       v-if="isDeleteTagModalOpen"
       title="Удалить тег"
       :is-open="isDeleteTagModalOpen"
-      @close="closeDeleteTagModal">
+      @close="closeDeleteTagModal"
+    >
       <div class="flex flex-col gap-4 p-4">
-        <p>Удалить тег «{{ tagToDelete?.name }} »?</p>
-        <p class="text-sm text-text-secondary">Это действие нельзя отменить. Убедитесь, что тег не используется.</p>
+        <p>Удалить тег «{{ tagToDelete?.name }}»?</p>
+        <p class="text-sm text-text-secondary">
+          Это действие нельзя отменить. Убедитесь, что тег не используется.
+        </p>
         <span v-if="deleteTagError" class="text-accent text-sm">{{ deleteTagError }}</span>
         <div class="flex gap-3 justify-end">
           <button class="secondary-btn" @click="closeDeleteTagModal">Отмена</button>

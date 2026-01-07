@@ -6,7 +6,7 @@ declare global {
         date: string,
         body: string,
         author_id: number,
-        tags: string,
+        tags: Tag[],
         preview: string,
         image_url: string | null,
     }

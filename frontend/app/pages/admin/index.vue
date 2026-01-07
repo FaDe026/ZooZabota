@@ -86,9 +86,9 @@ const logout = () => {
                  transition-transform active:scale-95 md:hover:-translate-y-1">
           Животные
         </NuxtLink>
-        <a href="" class="card-bg card-shadow py-4 text-center rounded-xl text-xl md:text-2xl transition-transform active:scale-95 md:hover:-translate-y-1">
+        <NuxtLink href="/admin/news" class="card-bg card-shadow py-4 text-center rounded-xl text-xl md:text-2xl transition-transform active:scale-95 md:hover:-translate-y-1">
           Новости
-        </a>
+        </NuxtLink>
       </div>
     </div>
     <div class="flex justify-center mt-6">
