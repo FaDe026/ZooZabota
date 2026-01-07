@@ -8,7 +8,9 @@ export const apiFetch = async <T = any>(
   } = {}
 ) => {
   const token = localStorage.getItem('access_token')
-  const baseURL = 'http://localhost:8000'
+  const config = useRuntimeConfig()
+  const baseURL = config.public.apiBase
+
 
   const headers = new Headers(options.headers)
   if (token) {
