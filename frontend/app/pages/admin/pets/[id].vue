@@ -15,7 +15,7 @@ const config = useRuntimeConfig()
 const { data: dog, pending, error } = await useServerFetch<Dog>(
   `/dogs/${String(route.params.id)}`
 )
-const {  data: availableTags, pending: tagsLoading } = useTags<Tag[]>() 
+const { data: availableTags, pending: tagsLoading } = useTags<Tag[]>()
 const isDeleteModalOpen = ref(false)
 const deleteMessage = ref<string | null>(null)
 const deleteStatus = ref<"none" | "success" | "error">("none")
@@ -35,7 +35,10 @@ async function deleteDog() {
     await apiFetch(`/dogs/${dog.value.id}`, { method: "DELETE" })
     deleteMessage.value = "Животное удалено успешно!"
     deleteStatus.value = "success"
-    setTimeout(() => router.back(), 500)
+    setTimeout(() => {
+      closeDeleteModal()
+      router.back()
+    }, 500)
   } catch {
     deleteMessage.value = "Ошибка удаления"
     deleteStatus.value = "error"
@@ -50,7 +53,7 @@ const editGender = ref<DogGender>(DogGender.male)
 const editVetPassport = ref(false)
 const selectedImage = ref<File | null>(null)
 const previewImage = ref<string | null>(null)
-const editBreed = ref("Неизвестно") 
+const editBreed = ref("Неизвестно")
 const selectedTagIds = ref<string[]>([])
 const nameError = ref(false)
 const descriptionError = ref(false)
@@ -228,8 +231,8 @@ function getImageUrl(path: string | null): string | undefined {
 <template>
   <section class="flex flex-col gap-4 base-section">
     <div class="base-container mx-auto relative flex justify-center items-center mb-2">
-      <svg class="absolute left-0 cursor-pointer" @click="backClicked" width="55" height="47"
-        viewBox="0 0 55 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg class="absolute left-0 cursor-pointer" @click="backClicked" width="55" height="47" viewBox="0 0 55 47"
+        fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M43.5416 23.5H11.4583" stroke="#1A3C40" stroke-width="5" stroke-linecap="round" />
         <path d="M27.4999 37.2083L11.4583 23.5L27.4999 9.79166" stroke="#1A3C40" stroke-width="5"
           stroke-linecap="round" />
@@ -244,13 +247,9 @@ function getImageUrl(path: string | null): string | undefined {
         <div class="base-container mx-auto">
           <div class="card-bg rounded-2xl overflow-hidden shadow-lg">
             <div class="w-full h-96 bg-gray-200 relative">
-              <img
-                v-if="previewImage"
-                :src="getImageUrl(previewImage)"
-                :alt="dog.name"
-                class="w-full h-full object-cover"/>
-              <Icon v-else name="material-symbols:pets"
-                class="absolute inset-0 m-auto text-6xl text-text-secondary" />
+              <img v-if="previewImage" :src="getImageUrl(previewImage)" :alt="dog.name"
+                class="w-full h-full object-cover" />
+              <Icon v-else name="material-symbols:pets" class="absolute inset-0 m-auto text-6xl text-text-secondary" />
               <div v-if="isInEditMode"
                 class="absolute inset-0 bg-black/30 flex items-center justify-center cursor-pointer"
                 @click="triggerImageUpload">
@@ -273,9 +272,7 @@ function getImageUrl(path: string | null): string | undefined {
                   <p>Ветпаспорт: {{ dog.veterinary_passport ? 'есть' : 'нет' }}</p>
                 </div>
                 <div class="flex flex-wrap gap-2 mb-6 text-lg">
-                  <span
-                    v-for="tag in dog.tags"
-                    :key="tag.id"
+                  <span v-for="tag in dog.tags" :key="tag.id"
                     class="border-2 border-accent text-accent rounded-full px-4 py-1">
                     {{ tag.name }}
                   </span>
@@ -284,18 +281,14 @@ function getImageUrl(path: string | null): string | undefined {
 
               <div v-else class="mb-6 text-text-secondary">
                 <div class="mb-4">
-                  <input
-                    v-model="editName"
-                    type="text"
+                  <input v-model="editName" type="text"
                     class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
-                    placeholder="Имя собаки"/>
+                    placeholder="Имя собаки" />
                   <span v-if="nameError" class="text-error text-sm">Имя не может быть пустым</span>
                 </div>
 
                 <div class="mb-4">
-                  <textarea
-                    v-model="editDescription"
-                    rows="3"
+                  <textarea v-model="editDescription" rows="3"
                     class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent resize-none"
                     placeholder="Описание">
                   </textarea>
@@ -305,11 +298,8 @@ function getImageUrl(path: string | null): string | undefined {
                 <div class="flex flex-col gap-4 mb-4 text-text-secondary">
                   <div>
                     <label class="block mb-2">Возраст (лет)</label>
-                    <input
-                      v-model.number="editAge"
-                      type="number"
-                      min="0"
-                      class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"/>
+                    <input v-model.number="editAge" type="number" min="0"
+                      class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" />
                     <span v-if="ageError" class="text-error text-sm">Возраст должен быть больше 0</span>
                   </div>
 
@@ -317,19 +307,13 @@ function getImageUrl(path: string | null): string | undefined {
                     <label class="block mb-2">Пол</label>
                     <div class="flex gap-4">
                       <label class="flex items-center gap-2 cursor-pointer font-normal">
-                        <input
-                          type="radio"
-                          :value="DogGender.male"
-                          v-model="editGender"
-                          class="w-4 h-4 accent-accent"/>
+                        <input type="radio" :value="DogGender.male" v-model="editGender"
+                          class="w-4 h-4 accent-accent" />
                         <span>Мужской</span>
                       </label>
                       <label class="flex items-center gap-2 cursor-pointer font-normal">
-                        <input
-                          type="radio"
-                          :value="DogGender.female"
-                          v-model="editGender"
-                          class="w-4 h-4 accent-accent"/>
+                        <input type="radio" :value="DogGender.female" v-model="editGender"
+                          class="w-4 h-4 accent-accent" />
                         <span>Женский</span>
                       </label>
                     </div>
@@ -347,16 +331,10 @@ function getImageUrl(path: string | null): string | undefined {
                   <div v-if="tagsLoading" class="text-sm text-text-secondary">Загрузка тегов..</div>
                   <div v-else class="flex flex-wrap items-center gap-2">
                     <template v-if="availableTags?.length">
-                      <div
-                        v-for="tag in availableTags"
-                        :key="tag.id"
-                        class="group relative flex items-center gap-2">
+                      <div v-for="tag in availableTags" :key="tag.id" class="group relative flex items-center gap-2">
                         <label class="cursor-pointer flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            :value="tag.id.toString()"
-                            v-model="selectedTagIds"
-                            class="sr-only peer"/>
+                          <input type="checkbox" :value="tag.id.toString()" v-model="selectedTagIds"
+                            class="sr-only peer" />
                           <span
                             class="relative overflow-hidden border rounded-full px-5 py-3 pr-9 text-base font-medium transition-colors duration-150"
                             :class="selectedTagIds.includes(tag.id.toString())
@@ -365,35 +343,24 @@ function getImageUrl(path: string | null): string | undefined {
                             {{ tag.name }}
                           </span>
                         </label>
-                        <button
-                          type="button"
-                          @click.stop="openDeleteTagModal(tag)"
+                        <button type="button" @click.stop="openDeleteTagModal(tag)"
                           class="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 rounded-full bg-transparent text-accent flex items-center justify-center opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 hover:bg-red-500 hover:text-white transition-all duration-200 ease-out"
                           title="Удалить тег">
-                          <svg
-                            viewBox="0 0 24 24"
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.75"
-                            stroke-linecap="round"
-                            stroke-linejoin="round">
+                          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                            stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 6l12 12" />
                             <path d="M18 6l-12 12" />
                           </svg>
                         </button>
                       </div>
                     </template>
-                    <button
-                      type="button"
-                      @click="openAddTagModal"
+                    <button type="button" @click="openAddTagModal"
                       class="ml-2 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center text-lg hover:bg-opacity-90 transition-opacity"
                       title="Добавить новый тег">
                       +
                     </button>
                   </div>
-                  <div
-                    v-if="!tagsLoading && (!availableTags || availableTags.length === 0)"
+                  <div v-if="!tagsLoading && (!availableTags || availableTags.length === 0)"
                     class="text-sm text-text-secondary">
                     Нет доступных тегов
                   </div>
@@ -421,20 +388,13 @@ function getImageUrl(path: string | null): string | undefined {
         </div>
       </div>
     </Modal>
-    <Modal
-      v-if="isAddTagModalOpen"
-      title="Создать тег"
-      :is-open="isAddTagModalOpen"
-      @close="closeAddTagModal">
+    <Modal v-if="isAddTagModalOpen" title="Создать тег" :is-open="isAddTagModalOpen" @close="closeAddTagModal">
       <div class="flex flex-col gap-4 p-4">
         <div>
           <label class="block text-text-secondary mb-2">Название тега</label>
-          <input
-            v-model="newTagName"
-            type="text"
+          <input v-model="newTagName" type="text"
             class="w-full border border-input-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
-            placeholder="Например: Дружелюбный"
-            @keyup.enter="createNewTag"/>
+            placeholder="Например: Дружелюбный" @keyup.enter="createNewTag" />
           <span v-if="newTagError" class="text-error text-sm mt-1">Поле не может быть пустым</span>
         </div>
         <div class="flex gap-3 justify-end">
@@ -443,11 +403,7 @@ function getImageUrl(path: string | null): string | undefined {
         </div>
       </div>
     </Modal>
-    <Modal
-      v-if="isDeleteTagModalOpen"
-      title="Удалить тег"
-      :is-open="isDeleteTagModalOpen"
-      @close="closeDeleteTagModal">
+    <Modal v-if="isDeleteTagModalOpen" title="Удалить тег" :is-open="isDeleteTagModalOpen" @close="closeDeleteTagModal">
       <div class="flex flex-col gap-4 p-4">
         <p>Удалить тег «{{ tagToDelete?.name }} »?</p>
         <p class="text-sm text-text-secondary">Это действие нельзя отменить. Убедитесь, что тег не используется.</p>
