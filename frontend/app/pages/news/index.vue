@@ -1,12 +1,15 @@
 <script lang="ts" setup>
 
 const { data, error, pending: pendingNews } = useServerFetch<News[]>(`/news`)
-const newsList = computed(() => {
-    if (!data.value) return []
+const newsList = ref<News[]>([])
 
-    return data.value.toReversed()
-})
-
+watch(data, (newValue) => {
+    if (!newValue) {
+        newsList.value = []
+        return
+    }
+    newsList.value = newValue.toReversed()
+}, { immediate: true })
 
 const isNewsListEmpty = computed(() => {
     return data.value && data.value.length === 0
