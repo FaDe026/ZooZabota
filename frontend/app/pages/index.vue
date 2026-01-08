@@ -2,14 +2,19 @@
 // const { data, error, pending } = await useNewsList()
 const config = useRuntimeConfig()
 
-const { data, error, pending: pendingNews } = await useFetch<News[]>("/news", {
-    baseURL: config.public.apiBase
-})
+const { data, error, pending: pendingNews } = await useServerFetch<News[]>("/news")
 const newsList = computed(() => {
     if (!data.value) return []
 
     return data.value.toReversed().slice(0, 3)
 })
+
+watch(error, (newValue) => {
+    console.log(newValue)
+    console.log(newValue?.data)
+    console.log(newValue?.message)
+    console.log(newValue?.cause)
+}, { immediate: true })
 
 
 const newsLoaded = computed(() => {
